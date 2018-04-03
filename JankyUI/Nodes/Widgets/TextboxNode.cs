@@ -18,10 +18,10 @@ namespace JankyUI.Nodes
             Password
         }
 
-        public readonly PropertyBinding<string> Text;
-        public readonly PropertyBinding<TextBoxTypeEnum> Type;
-        public readonly PropertyBinding<char> Mask;
-        public readonly PropertyBinding<int> Length;
+        public readonly DataContextProperty<string> Text;
+        public readonly DataContextProperty<TextBoxTypeEnum> Type;
+        public readonly DataContextProperty<char> Mask;
+        public readonly DataContextProperty<int> Length;
 
         public override void Execute()
         {

@@ -74,7 +74,7 @@ namespace JankyUI.Nodes
             var setterDelegate = BindingUtils.MakeCompatibleDelegate<Action<Node, object>>(setterMethod, targetType);
             var propType = setterMethod.GetParameters().Last().ParameterType;
 
-            if (propType.IsSubclassOfRawGeneric(typeof(PropertyBinding<>)))
+            if (propType.IsSubclassOfRawGeneric(typeof(DataContextProperty<>)))
             {
                 var innerType = propType.GetGenericArguments()[0];
                 var innerConverter = TypeDescriptor.GetConverter(innerType);
@@ -83,13 +83,15 @@ namespace JankyUI.Nodes
                     object instance;
                     if (value.IsNullOrWhiteSpace())
                     {
-                        instance = prop.DefaultValue.IsNullOrWhiteSpace()
+                        instance = prop.DefaultValue == null
                             ? Activator.CreateInstance(propType)
-                            : Activator.CreateInstance(propType, prop.DefaultValue);
+                            : Activator.CreateInstance(propType, innerConverter.ConvertFromString(prop.DefaultValue));
                     }
                     else if (value.StartsWith("@"))
                     {
-                        instance = Activator.CreateInstance(propType, node, value.Substring(1));
+                        instance = prop.DefaultValue == null
+                            ? Activator.CreateInstance(propType, node, value.Substring(1))
+                            : Activator.CreateInstance(propType, node, value.Substring(1), innerConverter.ConvertFromString(prop.DefaultValue));
                     }
                     else
                     {
@@ -100,19 +102,19 @@ namespace JankyUI.Nodes
                             var elemConverter = TypeDescriptor.GetConverter(elementType);
                             var array = (Array)Activator.CreateInstance(elementType.MakeArrayType(), values.Length);
                             for (int i = 0; i < values.Length; i++)
-                                array.SetValue(elemConverter.ConvertFrom(values[i]), i);
+                                array.SetValue(elemConverter.ConvertFromString(values[i]), i);
                             instance = Activator.CreateInstance(propType, new[] { array });
                         }
                         else
                         {
-                            var innerValue = innerConverter.ConvertFrom(value);
+                            var innerValue = innerConverter.ConvertFromString(value);
                             instance = Activator.CreateInstance(propType, innerValue);
                         }
                     }
                     setterDelegate(node, instance);
                 };
             }
-            else if (propType.IsSubclassOfRawGeneric(typeof(MethodBinding<>)))
+            else if (propType.IsSubclassOfRawGeneric(typeof(DataContextMethod<>)))
             {
                 return (node, value) =>
                 {

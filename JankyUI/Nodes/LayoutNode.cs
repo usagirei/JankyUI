@@ -25,13 +25,13 @@ namespace JankyUI.Nodes
             Both = Width | Height
         }
 
-        public PropertyBinding<float> Width { get; set; }
-        public PropertyBinding<float> MinWidth { get; set; }
-        public PropertyBinding<float> MaxWidth { get; set; }
-        public PropertyBinding<float> Height { get; set; }
-        public PropertyBinding<float> MinHeight { get; set; }
-        public PropertyBinding<float> MaxHeight { get; set; }
-        public PropertyBinding<ExpandModeEnum> ExpandMode { get; set; }
+        public readonly DataContextProperty<float> Width;
+        public readonly DataContextProperty<float> MinWidth;
+        public readonly DataContextProperty<float> MaxWidth;
+        public readonly DataContextProperty<float> Height;
+        public readonly DataContextProperty<float> MinHeight;
+        public readonly DataContextProperty<float> MaxHeight;
+        public readonly DataContextProperty<ExpandModeEnum> ExpandMode;
 
         public GUILayoutOption[] GetLayoutOptions()
         {

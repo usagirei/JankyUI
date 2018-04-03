@@ -8,7 +8,7 @@ namespace JankyUI.Nodes
     [JankyProperty("size", nameof(Size), DefaultValue = "NaN")]
     internal class SpaceNode : Node
     {
-        public readonly PropertyBinding<float> Size;
+        public readonly DataContextProperty<float> Size;
 
         public override void Execute()
         {

@@ -11,9 +11,9 @@ namespace JankyUI.Nodes
     [JankyProperty("items", nameof(Items))]
     internal class ToolbarNode : LayoutNode
     {
-        public readonly PropertyBinding<int> SelectedIndex;
-        public readonly PropertyBinding<string[]> Items;
-        public readonly MethodBinding<Action<int>> OnSelect;
+        public readonly DataContextProperty<int> SelectedIndex;
+        public readonly DataContextProperty<string[]> Items;
+        public readonly DataContextMethod<Action<int>> OnSelect;
 
         public override void Execute()
         {

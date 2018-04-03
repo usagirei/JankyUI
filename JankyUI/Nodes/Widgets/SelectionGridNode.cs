@@ -14,10 +14,10 @@ namespace JankyUI.Nodes
     [JankyProperty("onSelect", nameof(OnSelect))]
     internal class SelectionGridNode : LayoutNode
     {
-        public readonly PropertyBinding<string[]> Items;
-        public readonly PropertyBinding<int> Columns;
-        public readonly PropertyBinding<int> SelectedIndex;
-        public readonly MethodBinding<Action<int>> OnSelect;
+        public readonly DataContextProperty<string[]> Items;
+        public readonly DataContextProperty<int> Columns;
+        public readonly DataContextProperty<int> SelectedIndex;
+        public readonly DataContextMethod<Action<int>> OnSelect;
 
         public override void Execute()
         {

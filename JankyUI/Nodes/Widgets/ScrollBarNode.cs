@@ -20,11 +20,11 @@ namespace JankyUI.Nodes
             Vertical
         }
 
-        public readonly PropertyBinding<ScrollBarTypeEnum> Type;
-        public readonly PropertyBinding<float> Value;
-        public readonly PropertyBinding<float> Size;
-        public readonly PropertyBinding<float> MinValue;
-        public readonly PropertyBinding<float> MaxValue;
+        public readonly DataContextProperty<ScrollBarTypeEnum> Type;
+        public readonly DataContextProperty<float> Value;
+        public readonly DataContextProperty<float> Size;
+        public readonly DataContextProperty<float> MinValue;
+        public readonly DataContextProperty<float> MaxValue;
 
         public override void Execute()
         {

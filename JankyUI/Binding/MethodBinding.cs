@@ -5,7 +5,7 @@ namespace JankyUI.Binding
 {
     // TODO: make Lazy Binding like PropertyBinding (Only Recreate on type change, not on target)
     // That won't crash with invalid method signature but rather do nothing
-    internal class MethodBinding<TDelegate>
+    internal class DataContextMethod<TDelegate>
         where TDelegate : class
     {
         public string DataContextMethod { get; }

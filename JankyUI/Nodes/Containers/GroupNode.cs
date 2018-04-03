@@ -20,7 +20,7 @@ namespace JankyUI.Nodes
     [JankyProperty("type", nameof(Type), DefaultValue = "Horizontal")]
     internal class GroupNode : LayoutNode
     {
-        public readonly PropertyBinding<GroupTypeEnum> Type;
+        public readonly DataContextProperty<GroupTypeEnum> Type;
 
         public enum GroupTypeEnum
         {

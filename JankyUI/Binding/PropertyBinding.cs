@@ -5,7 +5,7 @@ using JankyUI.Nodes;
 
 namespace JankyUI.Binding
 {
-    internal class PropertyBinding<T>
+    internal class DataContextProperty<T>
     {
         private Type _propType;
         private T _internalValue;

@@ -9,8 +9,8 @@ namespace JankyUI.Nodes
     [JankyProperty("scroll-y", nameof(ScrollY))]
     internal class ScrollViewNode : LayoutNode
     {
-        public readonly PropertyBinding<float> ScrollX;
-        public readonly PropertyBinding<float> ScrollY;
+        public readonly DataContextProperty<float> ScrollX;
+        public readonly DataContextProperty<float> ScrollY;
 
         private Vector2 ScrollPos
         {

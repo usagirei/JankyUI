@@ -13,9 +13,9 @@ namespace JankyUI.Nodes
     internal class WindowNode : AreaNode
     {
         public int ID { get; set; }
-        public readonly PropertyBinding<string> Title;
-        public readonly MethodBinding<Action<int, bool>> MouseEnter;
-        public readonly MethodBinding<Action<int, bool>> MouseLeave;
+        public readonly DataContextProperty<string> Title;
+        public readonly DataContextMethod<Action<int, bool>> MouseEnter;
+        public readonly DataContextMethod<Action<int, bool>> MouseLeave;
 
         private bool _mouseState = false;
 

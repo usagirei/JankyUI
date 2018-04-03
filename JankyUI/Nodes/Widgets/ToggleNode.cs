@@ -9,8 +9,8 @@ namespace JankyUI.Nodes
     [JankyProperty("checked", nameof(Checked))]
     internal class ToggleNode : LayoutNode
     {
-        public readonly PropertyBinding<bool> Checked;
-        public readonly PropertyBinding<string> Text;
+        public readonly DataContextProperty<bool> Checked;
+        public readonly DataContextProperty<string> Text;
 
         public override void Execute()
         {

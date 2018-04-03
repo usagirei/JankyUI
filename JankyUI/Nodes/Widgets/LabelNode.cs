@@ -9,8 +9,8 @@ namespace JankyUI.Nodes
     [JankyProperty("image", nameof(Image))]
     internal class LabelNode : LayoutNode
     {
-        public readonly PropertyBinding<string> Text;
-        public readonly PropertyBinding<Texture> Image;
+        public readonly DataContextProperty<string> Text;
+        public readonly DataContextProperty<Texture> Image;
 
         private readonly GUIContent Content;
 
