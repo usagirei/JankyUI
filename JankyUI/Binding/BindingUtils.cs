@@ -142,8 +142,10 @@ namespace JankyUI.Binding
 
             if (returnType != typeof(void))
             {
-                if (returnType != newRetType)
-                    il.Emit(OpCodes.Unbox_Any, newRetType);
+                if (returnType.IsValueType)
+                    il.Emit(OpCodes.Box, returnType);
+                if (returnType != newRetType && !newRetType.IsValueType)
+                    il.Emit(OpCodes.Castclass, newRetType);
             }
             il.Emit(OpCodes.Ret);
 
