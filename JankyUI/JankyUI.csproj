@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CE04ED67-F5BA-4BC9-8B17-381D01D417AB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JankyUI</RootNamespace>
+    <AssemblyName>JankyUI</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>K:\BepinEx\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\lib\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attributes\JankyDefaultOverrideAttribute.cs" />
+    <Compile Include="Attributes\JankyPropertyAttribute.cs" />
+    <Compile Include="Binding\BindingUtils.cs" />
+    <Compile Include="JankyContext.cs" />
+    <Compile Include="JankyUIGenerator.cs" />
+    <Compile Include="Nodes\Containers\AreaNode.cs" />
+    <Compile Include="Nodes\Widgets\LabelNode.cs" />
+    <Compile Include="Nodes\Containers\ScrollViewNode.cs" />
+    <Compile Include="Nodes\Containers\GroupNode.cs" />
+    <Compile Include="Nodes\DataContextNode.cs" />
+    <Compile Include="Nodes\Node.cs" />
+    <Compile Include="Nodes\NodeHelper.cs" />
+    <Compile Include="Nodes\LayoutNode.cs" />
+    <Compile Include="Nodes\Widgets\ScrollBarNode.cs" />
+    <Compile Include="Nodes\Widgets\SelectionGridNode.cs" />
+    <Compile Include="Nodes\Widgets\SliderNode.cs" />
+    <Compile Include="Nodes\Widgets\SpaceNode.cs" />
+    <Compile Include="Nodes\Widgets\TextboxNode.cs" />
+    <Compile Include="Nodes\Widgets\ButtonNode.cs" />
+    <Compile Include="Binding\PropertyBinding.cs" />
+    <Compile Include="Attributes\JankyTagAttribute.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Binding\MethodBinding.cs" />
+    <Compile Include="Nodes\Widgets\ToggleNode.cs" />
+    <Compile Include="Nodes\Widgets\ToolbarNode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Nodes\Containers\WindowNode.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
