@@ -210,4 +210,17 @@ namespace JankyUI.Nodes
             return true;
         }
     }
+
+    internal static class NodeHelper<TNode>
+        where TNode : Node, new()
+    {
+        private static NodeHelper _instance;
+
+        public static NodeHelper Instance
+        {
+            get {
+                return _instance ?? (_instance = new NodeHelper(typeof(TNode)));
+            }
+        }
+    }
 }

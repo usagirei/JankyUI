@@ -73,7 +73,12 @@ namespace JankyUI
         {
             var nodes = ass.GetTypes()
                 .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Node)))
-                .Select(t => new NodeHelper(t));
+                .Select(t =>
+                {
+                    return (NodeHelper) typeof(NodeHelper<>).MakeGenericType(t)
+                                                            .GetProperty("Instance")
+                                                            .GetValue(null, null);
+                });
 
             foreach (var node in nodes)
             {
