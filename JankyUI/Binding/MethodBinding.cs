@@ -12,7 +12,7 @@ namespace JankyUI.Binding
         public Node TargetNode { get; }
         private TDelegate _delegate;
 
-        static MethodBinding()
+        static DataContextMethod()
         {
             Empty = BindingUtils.MakeEmptyDelegate<TDelegate>();
         }
