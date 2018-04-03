@@ -10,7 +10,7 @@ namespace JankyUI.Nodes
     {
         public readonly DataContextProperty<float> Size;
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             if (float.IsNaN(Size))
                 GUILayout.FlexibleSpace();

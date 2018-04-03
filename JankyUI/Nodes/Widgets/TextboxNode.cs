@@ -23,7 +23,7 @@ namespace JankyUI.Nodes
         public readonly DataContextProperty<char> Mask;
         public readonly DataContextProperty<int> Length;
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             if (Length <= 0)
             {

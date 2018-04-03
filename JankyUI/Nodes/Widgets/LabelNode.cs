@@ -19,7 +19,7 @@ namespace JankyUI.Nodes
             Content = new GUIContent();
         }
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             UpdateContent();
             GUILayout.Label(Content, GetLayoutOptions());
@@ -37,8 +37,8 @@ namespace JankyUI.Nodes
     [JankyProperty("image", nameof(Image))]
     internal class BoxNode : LayoutNode
     {
-        public readonly PropertyBinding<string> Text;
-        public readonly PropertyBinding<Texture> Image;
+        public readonly DataContextProperty<string> Text;
+        public readonly DataContextProperty<Texture> Image;
 
         private readonly GUIContent Content;
 
@@ -47,7 +47,7 @@ namespace JankyUI.Nodes
             Content = new GUIContent();
         }
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             UpdateContent();
             GUILayout.Box(Content, GetLayoutOptions());

@@ -58,6 +58,6 @@ namespace JankyUI.Nodes
             return Enumerate().ToArray();
         }
 
-        public abstract override void Execute();
+        protected abstract override void OnGUI();
     }
 }

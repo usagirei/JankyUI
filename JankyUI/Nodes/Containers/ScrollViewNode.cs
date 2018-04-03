@@ -25,7 +25,7 @@ namespace JankyUI.Nodes
             }
         }
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             ScrollPos = GUILayout.BeginScrollView(ScrollPos, GetLayoutOptions());
 

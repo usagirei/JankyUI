@@ -39,7 +39,7 @@ namespace JankyUI.Nodes
             }
         }
 
-        public virtual void Execute()
+        protected virtual void OnGUI()
         {
         }
     }

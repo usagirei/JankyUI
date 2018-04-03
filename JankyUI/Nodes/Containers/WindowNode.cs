@@ -19,7 +19,7 @@ namespace JankyUI.Nodes
 
         private bool _mouseState = false;
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             AreaRect = GUI.Window(ID, AreaRect, WndProc, Title);
 

@@ -19,7 +19,7 @@ namespace JankyUI.Nodes
         public readonly DataContextProperty<int> SelectedIndex;
         public readonly DataContextMethod<Action<int>> OnSelect;
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             var prevIdx = SelectedIndex.Value;
             string[] items = Items;

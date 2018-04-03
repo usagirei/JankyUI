@@ -12,7 +12,7 @@ namespace JankyUI.Nodes
         public readonly DataContextProperty<bool> Checked;
         public readonly DataContextProperty<string> Text;
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             Checked.Value = GUILayout.Toggle(Checked, Text, GetLayoutOptions());
         }

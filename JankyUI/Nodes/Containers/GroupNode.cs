@@ -28,7 +28,7 @@ namespace JankyUI.Nodes
             Vertical,
         }
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             switch (Type.Value)
             {

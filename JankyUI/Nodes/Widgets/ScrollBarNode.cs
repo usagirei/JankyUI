@@ -26,7 +26,7 @@ namespace JankyUI.Nodes
         public readonly DataContextProperty<float> MinValue;
         public readonly DataContextProperty<float> MaxValue;
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             switch (Type.Value)
             {

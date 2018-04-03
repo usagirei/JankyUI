@@ -30,7 +30,7 @@ namespace JankyUI.Nodes
             Content.image = Image;
         }
 
-        public override void Execute()
+        protected override void OnGUI()
         {
             UpdateContent();
             if (IsRepeat?.Value ?? false)
