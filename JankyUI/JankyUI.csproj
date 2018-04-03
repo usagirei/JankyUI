@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>K:\BepinEx\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -49,13 +49,16 @@
     <Compile Include="Attributes\JankyDefaultOverrideAttribute.cs" />
     <Compile Include="Attributes\JankyPropertyAttribute.cs" />
     <Compile Include="Binding\BindingUtils.cs" />
+    <Compile Include="Binding\MethodBinding.cs" />
+    <Compile Include="Binding\PropertyBinding.cs" />
+    <Compile Include="IJankyContext.cs" />
     <Compile Include="JankyContext.cs" />
+    <Compile Include="JankyDataContextStack.cs" />
     <Compile Include="JankyUIGenerator.cs" />
     <Compile Include="Nodes\Containers\AreaNode.cs" />
     <Compile Include="Nodes\Widgets\LabelNode.cs" />
     <Compile Include="Nodes\Containers\ScrollViewNode.cs" />
     <Compile Include="Nodes\Containers\GroupNode.cs" />
-    <Compile Include="Nodes\DataContextNode.cs" />
     <Compile Include="Nodes\Node.cs" />
     <Compile Include="Nodes\NodeHelper.cs" />
     <Compile Include="Nodes\LayoutNode.cs" />
@@ -65,10 +68,8 @@
     <Compile Include="Nodes\Widgets\SpaceNode.cs" />
     <Compile Include="Nodes\Widgets\TextboxNode.cs" />
     <Compile Include="Nodes\Widgets\ButtonNode.cs" />
-    <Compile Include="Binding\PropertyBinding.cs" />
     <Compile Include="Attributes\JankyTagAttribute.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Binding\MethodBinding.cs" />
     <Compile Include="Nodes\Widgets\ToggleNode.cs" />
     <Compile Include="Nodes\Widgets\ToolbarNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

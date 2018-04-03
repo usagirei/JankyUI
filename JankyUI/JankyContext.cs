@@ -1,21 +1,35 @@
-﻿using JankyUI.Nodes;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using JankyUI.Binding;
+using JankyUI.Nodes;
 using UnityEngine;
 
 namespace JankyUI
 {
-    public class JankyContext
+    internal partial class JankyNodeContext : IJankyContext
     {
+        object IJankyContext.DataContext { get; set; }
+        GUISkin IJankyContext.Skin { get; set; }
+
         internal Node RootNode { get; set; }
 
-        public object DataContext { get; set; }
+        public JankyDataContextStack DataContextStack { get; }
 
-        internal JankyContext()
+        public JankyNodeContext(object dc)
         {
+            ((IJankyContext)this).DataContext = dc;
+            DataContextStack = new JankyDataContextStack(this);
         }
 
-        public void Invoke()
+        public void OnGUI()
         {
+            DataContextStack.Begin();
+
             RootNode.Execute();
+
+            DataContextStack.End();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using JankyUI.Nodes;
@@ -7,37 +8,12 @@ namespace JankyUI.Binding
 {
     internal class DataContextProperty<T>
     {
-        private Type _propType;
         private T _internalValue;
-
-        private Func<object, T> _getter;
-        private Action<object, T> _setter;
+        private T _defaultValue;
 
         public string DataContextMember { get; }
+
         public Node TargetNode { get; }
-
-        public bool IsBound
-        {
-            get
-            {
-                return TargetNode != null && DataContextMember !=  null;
-            }
-        }
-        public bool CanRead
-        {
-            get
-            {
-                return TargetNode == null || DataContextMember == null || _getter != null;
-            }
-        }
-
-        public bool CanWrite
-        {
-            get
-            {
-                return TargetNode == null || DataContextMember == null || _setter != null;
-            }
-        }
 
         public T Value
         {
@@ -45,13 +21,20 @@ namespace JankyUI.Binding
             set => SetValue(value);
         }
 
-        public PropertyBinding(Node targetNode, string property)
+        public DataContextProperty(Node targetNode, string property, T defaultValue)
+        {
+            DataContextMember = property.IsNullOrWhiteSpace() ? null : property;
+            TargetNode = targetNode;
+            _defaultValue = defaultValue;
+        }
+
+        public DataContextProperty(Node targetNode, string property)
         {
             DataContextMember = property.IsNullOrWhiteSpace() ? null : property;
             TargetNode = targetNode;
         }
 
-        public PropertyBinding(T value)
+        public DataContextProperty(T value)
         {
             TargetNode = null;
             DataContextMember = null;
@@ -59,7 +42,7 @@ namespace JankyUI.Binding
             _internalValue = value;
         }
 
-        public PropertyBinding()
+        public DataContextProperty()
         {
             TargetNode = null;
             DataContextMember = null;
@@ -72,18 +55,22 @@ namespace JankyUI.Binding
             if (TargetNode == null || DataContextMember == null)
                 return _internalValue;
 
-            var dc = TargetNode.DataContext;
-            if (dc == null)
+            var stack = TargetNode.Context.DataContextStack;
+            var op = stack.GetDataContextMember<T>(DataContextMember, out var value);
+            switch (op)
             {
-                //throw new NullReferenceException("Target DataContext is Null");
-                return _internalValue;
+                case JankyDataContextStack.DataContextOperationResult.Success:
+                    return _internalValue = value;
+                case JankyDataContextStack.DataContextOperationResult.PropertyNull:
+                case JankyDataContextStack.DataContextOperationResult.TargetNull:
+                    return _defaultValue;
+                case JankyDataContextStack.DataContextOperationResult.MissingAcessor:
+                    Console.WriteLine("Property has no Getter: {0}", DataContextMember);
+                    return _defaultValue;
+                default:
+                    throw new ArgumentOutOfRangeException("Invalid Data Operation");
             }
-
-            Validate();
-            if (!CanRead)
-                throw new NotSupportedException("Property has no Getter");
-
-            return _internalValue = _getter(dc);
+            
         }
 
         private void SetValue(T value)
@@ -94,59 +81,39 @@ namespace JankyUI.Binding
                 return;
             }
 
-            var dc = TargetNode.DataContext;
-            if (dc == null)
+            if (!Equals(_internalValue, value))
             {
-                //throw new NullReferenceException("Target DataContext is Null");
-                _internalValue = value;
-                return;
-            }
-
-            Validate();
-            if (!CanWrite)
-                throw new NotSupportedException("Property has no Setter");
-
-            if (!object.Equals(_internalValue, value))
-            {
-                _internalValue = value;
-                _setter(dc, value);
-            }
-        }
-
-        private void Validate()
-        {
-            var dc = TargetNode.DataContext;
-            var curType = dc.GetType();
-            if (_propType != curType)
-            {
-                _propType = curType;
-                const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-                var targetMember = curType.GetMember(DataContextMember, flags).FirstOrDefault();
-                if (targetMember == null)
-                    throw new MissingMemberException($"Target has no public member named '{DataContextMember}'");
-
-                switch (targetMember)
+                var stack = TargetNode.Context.DataContextStack;
+                var op = stack.SetDataContextMember<T>(DataContextMember, value);
+                switch (op)
                 {
-                    case PropertyInfo prop:
-                        BindingUtils.MakePropertyAcessors(prop, out _getter, out _setter);
-                        break;
-                    case FieldInfo field:
-                        BindingUtils.MakeFieldAcessors(field, out _getter, out _setter);
-                        break;
+                    case JankyDataContextStack.DataContextOperationResult.Success:
+                    case JankyDataContextStack.DataContextOperationResult.TargetNull:
+                        _internalValue = value;
+                        return;
+                    case JankyDataContextStack.DataContextOperationResult.MissingAcessor:
+                        Console.WriteLine("Property has no Setter: {0}", DataContextMember);
+                        _internalValue = value;
+                        return;
                     default:
-                        throw new ArgumentException("Member Type is not supported: " + targetMember);
+                        throw new ArgumentOutOfRangeException("Invalid Data Operation");
                 }
             }
         }
 
-        public static explicit operator PropertyBinding<T>(T value)
+        public static explicit operator DataContextProperty<T>(T value)
         {
-            return new PropertyBinding<T>(null, null);
+            return new DataContextProperty<T>(null, null, default(T));
         }
 
-        public static implicit operator T(PropertyBinding<T> binding)
+        public static implicit operator T(DataContextProperty<T> binding)
         {
             return binding.Value;
+        }
+
+        public override string ToString()
+        {
+            return Value?.ToString() ?? "null";
         }
     }
 }

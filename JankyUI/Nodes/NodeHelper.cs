@@ -167,18 +167,17 @@ namespace JankyUI.Nodes
             }
         }
 
-        public Node Activate()
+        public Node Activate(JankyNodeContext context)
         {
-            return Activate(null, null);
+            return Activate(context, null);
         }
 
-        public Node Activate(Node parentNode, Dictionary<string, string> initProps)
+        public Node Activate(JankyNodeContext context, Dictionary<string, string> initProps)
         {
             var node = (Node)FormatterServices.GetUninitializedObject(NodeType);
 
-            node.ParentNode = parentNode;
-            parentNode?.Children.Add(node);
             node.Children = new List<Node>();
+            node.Context = context;
 
             foreach (var kvp in _properties)
             {

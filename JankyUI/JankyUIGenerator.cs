@@ -27,38 +27,34 @@ namespace JankyUI
                 LoadJankyNodes(ass);
         }
 
-        private JankyContext ResolveContext(XmlDocument xmlDoc, object dc = null)
+        private JankyNodeContext ResolveContext(XmlDocument xmlDoc, object dc = null)
         {
-            var rootNode = (DataContextNode)_nodes["DataContext"].Activate();
-            var ctx = new JankyContext();
-
-            ctx.RootNode = rootNode;
-            ctx.DataContext = dc;
-
-            rootNode.SetDataContextRaw(ctx);
-            rootNode.PropertyName = nameof(JankyContext.DataContext);
-
-            ResolveNodeRecursive(xmlDoc.FirstChild, rootNode);
-
+            var ctx = new JankyNodeContext(dc);
+            ctx.RootNode = NodeHelper<Node>.Instance.Activate(ctx);
+            var first = ResolveNodeRecursive(ctx, xmlDoc.FirstChild);
+            ctx.RootNode.Children.Add(first);
             return ctx;
         }
 
-        private Node ResolveNodeRecursive(XmlNode xmlNode, Node parent = null)
+        private Node ResolveNodeRecursive(JankyNodeContext context, XmlNode xmlNode)
         {
             var nodeName = xmlNode.LocalName;
             var nodeInfo = _nodes[nodeName];
             var props = xmlNode.Attributes
                 .OfType<XmlAttribute>()
                 .ToDictionary(x => x.LocalName, x => x.Value);
-            var node = nodeInfo.Activate(parent, props);
+            var node = nodeInfo.Activate(context, props);
 
             foreach (XmlNode childNode in xmlNode.ChildNodes)
-                ResolveNodeRecursive(childNode, node);
+            {
+                var child = ResolveNodeRecursive(context, childNode);
+                node.Children.Add(child);
+            }
 
             return node;
         }
 
-        public JankyContext CreateJankyUI(string xml, object viewModel)
+        public IJankyContext CreateJankyUI(string xml, object viewModel)
         {
             var doc = new XmlDocument();
             doc.LoadXml(xml);

@@ -1,46 +1,59 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
+using JankyUI.Attributes;
 using UnityEngine;
 
 namespace JankyUI.Nodes
 {
-    internal abstract class Node
+    [JankyProperty("data-context", nameof(DataContextName))]
+    internal class Node
     {
         public List<Node> Children { get; set; }
+        public JankyNodeContext Context { get; set; }
 
-        public Node ParentNode { get; set; }
+        public readonly string DataContextName;
 
-        private object _dataContext;
-        public virtual object DataContext
-        {
-            get
-            {
-                // Try Caching DataContext if Invalidated
-                if (_dataContext == null || !object.ReferenceEquals(_dataContext, ParentNode?.DataContext))
-                {
-                    _dataContext = ParentNode?.DataContext;
-                }
-                return _dataContext;
-            }
-        }
-
-        private GUISkin _guiSkin;
         public virtual GUISkin Skin
         {
             get
             {
-                // Try Caching Skin if Invalidated
-                if (_guiSkin == null || !object.ReferenceEquals(_guiSkin, ParentNode?.Skin))
-                {
-                    _guiSkin = ParentNode?.Skin;
-                }
-                // Return Default if none set;
-                return _guiSkin ?? GUI.skin;
+                return ((IJankyContext)Context).Skin;
+            }
+        }
+
+        public object DataContext
+        {
+            get
+            {
+                return Context.DataContextStack.Current();
+            }
+        }
+
+        protected void PushDataContext()
+        {
+            if (DataContextName.IsNullOrWhiteSpace())
+                return;
+
+        }
+
+        public void Execute()
+        {
+            if (!DataContextName.IsNullOrWhiteSpace())
+            {
+                Context.DataContextStack.Push(DataContextName);
+                OnGUI();
+                Context.DataContextStack.Pop();
+            }else
+            {
+                OnGUI();
             }
         }
 
         protected virtual void OnGUI()
         {
+            foreach (var child in Children)
+                child.Execute();
         }
     }
 }

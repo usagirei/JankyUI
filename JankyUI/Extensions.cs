@@ -18,7 +18,7 @@ namespace JankyUI
             where T : Attribute
         {
             var attributes = target.GetCustomAttributes<T>(inherit);
-            return attributes.First();
+            return attributes.FirstOrDefault();
         }
 
         public static IEnumerable<T> GetCustomAttributes<T>(this Type target, bool inherit)

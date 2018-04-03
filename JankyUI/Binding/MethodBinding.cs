@@ -8,7 +8,7 @@ namespace JankyUI.Binding
     internal class DataContextMethod<TDelegate>
         where TDelegate : class
     {
-        public string DataContextMethod { get; }
+        public string MethodName { get; }
         public Node TargetNode { get; }
         private TDelegate _delegate;
 
@@ -21,7 +21,7 @@ namespace JankyUI.Binding
         {
             get
             {
-                if (TargetNode == null || DataContextMethod.IsNullOrWhiteSpace())
+                if (TargetNode == null || MethodName.IsNullOrWhiteSpace())
                     return default(TDelegate);
 
                 Validate();
@@ -29,18 +29,18 @@ namespace JankyUI.Binding
             }
         }
 
-        public MethodBinding(Node targetNode, string method)
+        public DataContextMethod(Node targetNode, string method)
         {
             if (!typeof(TDelegate).IsSubclassOf(typeof(Delegate)))
                 throw new ArgumentException("Generic Type is not a Delegate", nameof(TDelegate));
 
-            DataContextMethod = method;
+            MethodName = method;
             TargetNode = targetNode;
         }
 
-        public MethodBinding()
+        public DataContextMethod()
         {
-            DataContextMethod = null;
+            MethodName = null;
             TargetNode = null;
         }
 
@@ -55,12 +55,12 @@ namespace JankyUI.Binding
             {
                 var targetObj = TargetNode.DataContext;
                 var targetType = targetObj.GetType();
-                var targetMethod = targetType.GetMethod(DataContextMethod);
+                var targetMethod = targetType.GetMethod(MethodName);
 
                 if (targetMethod == null)
                 {
                     Console.WriteLine("Method '{0}' does not exist on '{1}'",
-                        DataContextMethod,
+                        MethodName,
                         targetType.FullName
                     );
                     _delegate = Empty;
