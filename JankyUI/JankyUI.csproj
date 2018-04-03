@@ -73,6 +73,7 @@
     <Compile Include="Nodes\Widgets\ToolbarNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Nodes\Containers\WindowNode.cs" />
+    <Compile Include="Compat\ValueTuple`2.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
