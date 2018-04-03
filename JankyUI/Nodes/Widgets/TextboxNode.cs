@@ -1,14 +1,15 @@
-﻿using JankyUI.Attributes;
+﻿using System;
+using JankyUI.Attributes;
 using JankyUI.Binding;
 using UnityEngine;
 
 namespace JankyUI.Nodes
 {
     [JankyTag("Textbox")]
-    [JankyProperty("text", nameof(Text))]
+    [JankyProperty("text", nameof(Text), DefaultValue = "")]
     [JankyProperty("type", nameof(Type), DefaultValue = "simple")]
     [JankyProperty("mask", nameof(Mask), DefaultValue = "*")]
-    [JankyProperty("length", nameof(Length), DefaultValue = "-1")]
+    [JankyProperty("length", nameof(Length), DefaultValue = "0")]
     internal class TextboxNode : LayoutNode
     {
         public enum TextBoxTypeEnum
