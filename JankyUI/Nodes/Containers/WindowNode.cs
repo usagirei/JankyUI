@@ -6,21 +6,24 @@ using UnityEngine;
 namespace JankyUI.Nodes
 {
     [JankyTag("Window")]
-    [JankyProperty("id", nameof(ID))]
-    [JankyProperty("mouseEnter", nameof(MouseEnter))]
-    [JankyProperty("mouseLeave", nameof(MouseLeave))]
+    [JankyProperty("mouse-enter", nameof(MouseEnter))]
+    [JankyProperty("mouse-leave", nameof(MouseLeave))]
     [JankyProperty("title", nameof(Title))]
     internal class WindowNode : AreaNode
     {
-        public int ID { get; set; }
-        public readonly DataContextProperty<string> Title;
-        public readonly DataContextMethod<Action<int, bool>> MouseEnter;
-        public readonly DataContextMethod<Action<int, bool>> MouseLeave;
+        public readonly JankyProperty<string> Title;
+        public readonly JankyMethod<Action<int, bool>> MouseEnter;
+        public readonly JankyMethod<Action<int, bool>> MouseLeave;
+
+        public int ID { get { return Context.WindowID; } }
 
         private bool _mouseState = false;
 
         protected override void OnGUI()
         {
+#if MOCK
+            WndProc(-1);
+#else
             AreaRect = GUI.Window(ID, AreaRect, WndProc, Title);
 
             var newMouseState = AreaRect.Contains(Event.current.mousePosition);
@@ -32,10 +35,17 @@ namespace JankyUI.Nodes
                 else
                     MouseLeave.Invoke(ID, false);
             }
+#endif
         }
 
         public void WndProc(int id)
         {
+#if MOCK
+            Console.WriteLine("Begin Window: {0} {1} {2} {3}", X, Y, Width, Height);
+            foreach (var child in Children)
+                child.Execute();
+            Console.WriteLine("End Window");
+#else
             try
             {
                 var clientArea = new Rect();
@@ -56,6 +66,7 @@ namespace JankyUI.Nodes
             {
                 Console.WriteLine(ex);
             }
+#endif
         }
     }
 }

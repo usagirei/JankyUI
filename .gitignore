@@ -3,6 +3,7 @@
 
 # Project-Specific Files
 [Ll]ib/
+[Ss]andbox/
 
 # User-specific files
 *.suo

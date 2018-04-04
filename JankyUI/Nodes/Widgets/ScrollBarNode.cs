@@ -1,6 +1,7 @@
 ﻿using System;
 using JankyUI.Attributes;
 using JankyUI.Binding;
+using JankyUI.Enums;
 using UnityEngine;
 
 namespace JankyUI.Nodes
@@ -12,22 +13,21 @@ namespace JankyUI.Nodes
     [JankyProperty("value", nameof(Value))]
     [JankyProperty("min-value", nameof(MinValue))]
     [JankyProperty("max-value", nameof(MaxValue))]
+    [JankyProperty("on-change", nameof(OnChange))]
     internal class ScrollBarNode : LayoutNode
     {
-        public enum ScrollBarTypeEnum
-        {
-            Horizontal,
-            Vertical
-        }
-
-        public readonly DataContextProperty<ScrollBarTypeEnum> Type;
-        public readonly DataContextProperty<float> Value;
-        public readonly DataContextProperty<float> Size;
-        public readonly DataContextProperty<float> MinValue;
-        public readonly DataContextProperty<float> MaxValue;
+        public readonly JankyProperty<ScrollBarTypeEnum> Type;
+        public readonly JankyProperty<float> Value;
+        public readonly JankyProperty<float> Size;
+        public readonly JankyProperty<float> MinValue;
+        public readonly JankyProperty<float> MaxValue;
+        public readonly JankyMethod<Action<float>> OnChange;
 
         protected override void OnGUI()
         {
+#if MOCK
+            Console.WriteLine("ScrollBar: {0}", Value);
+#else
             switch (Type.Value)
             {
                 case ScrollBarTypeEnum.Horizontal:
@@ -38,6 +38,10 @@ namespace JankyUI.Nodes
                     Value.Value = GUILayout.VerticalScrollbar(Value, Size, MinValue, MaxValue, GetLayoutOptions());
                     break;
             }
+
+            if (Value.LastSetResult != DataOperationResultEnum.Unchanged)
+                OnChange.Invoke(Value);
+#endif
         }
     }
 }

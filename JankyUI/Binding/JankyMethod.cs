@@ -5,14 +5,14 @@ namespace JankyUI.Binding
 {
     // TODO: make Lazy Binding like PropertyBinding (Only Recreate on type change, not on target)
     // That won't crash with invalid method signature but rather do nothing
-    internal class DataContextMethod<TDelegate>
+    internal class JankyMethod<TDelegate>
         where TDelegate : class
     {
         public string MethodName { get; }
         public Node TargetNode { get; }
         private TDelegate _delegate;
 
-        static DataContextMethod()
+        static JankyMethod()
         {
             Empty = BindingUtils.MakeEmptyDelegate<TDelegate>();
         }
@@ -22,14 +22,13 @@ namespace JankyUI.Binding
             get
             {
                 if (TargetNode == null || MethodName.IsNullOrWhiteSpace())
-                    return default(TDelegate);
-
+                    return Empty;
                 Validate();
                 return _delegate;
             }
         }
 
-        public DataContextMethod(Node targetNode, string method)
+        public JankyMethod(Node targetNode, string method)
         {
             if (!typeof(TDelegate).IsSubclassOf(typeof(Delegate)))
                 throw new ArgumentException("Generic Type is not a Delegate", nameof(TDelegate));
@@ -38,7 +37,7 @@ namespace JankyUI.Binding
             TargetNode = targetNode;
         }
 
-        public DataContextMethod()
+        public JankyMethod()
         {
             MethodName = null;
             TargetNode = null;

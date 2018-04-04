@@ -1,4 +1,5 @@
-﻿using JankyUI.Attributes;
+﻿using System;
+using JankyUI.Attributes;
 using JankyUI.Binding;
 using UnityEngine;
 
@@ -9,8 +10,8 @@ namespace JankyUI.Nodes
     [JankyProperty("image", nameof(Image))]
     internal class LabelNode : LayoutNode
     {
-        public readonly DataContextProperty<string> Text;
-        public readonly DataContextProperty<Texture> Image;
+        public readonly JankyProperty<string> Text;
+        public readonly JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
 
@@ -21,8 +22,13 @@ namespace JankyUI.Nodes
 
         protected override void OnGUI()
         {
+#if MOCK
+            UpdateContent();
+            Console.WriteLine("Label: {0}", Text);
+#else
             UpdateContent();
             GUILayout.Label(Content, GetLayoutOptions());
+#endif
         }
 
         private void UpdateContent()
@@ -37,8 +43,8 @@ namespace JankyUI.Nodes
     [JankyProperty("image", nameof(Image))]
     internal class BoxNode : LayoutNode
     {
-        public readonly DataContextProperty<string> Text;
-        public readonly DataContextProperty<Texture> Image;
+        public readonly JankyProperty<string> Text;
+        public readonly JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
 

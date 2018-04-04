@@ -10,17 +10,20 @@ namespace JankyUI
 {
     internal partial class JankyNodeContext : IJankyContext
     {
-        object IJankyContext.DataContext { get; set; }
-        GUISkin IJankyContext.Skin { get; set; }
+        public object DataContext { get; set; }
+        public GUISkin Skin { get; set; }
+        public Dictionary<string,object> Resources { get; }
 
+        public int WindowID { get; set; }
         internal Node RootNode { get; set; }
 
         public JankyDataContextStack DataContextStack { get; }
 
-        public JankyNodeContext(object dc)
+        public JankyNodeContext(object dataContext)
         {
-            ((IJankyContext)this).DataContext = dc;
+            DataContext = dataContext;
             DataContextStack = new JankyDataContextStack(this);
+            Resources = new Dictionary<string, object>();
         }
 
         public void OnGUI()

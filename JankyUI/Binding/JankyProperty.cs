@@ -2,16 +2,19 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using JankyUI.Enums;
 using JankyUI.Nodes;
 
 namespace JankyUI.Binding
 {
-    internal class DataContextProperty<T>
+    internal class JankyProperty<T>
     {
-        private T _internalValue;
         private T _defaultValue;
-
+        private T _internalValue;
         public string DataContextMember { get; }
+
+        public DataOperationResultEnum LastGetResult { get; private set; }
+        public DataOperationResultEnum LastSetResult { get; private set; }
 
         public Node TargetNode { get; }
 
@@ -21,20 +24,14 @@ namespace JankyUI.Binding
             set => SetValue(value);
         }
 
-        public DataContextProperty(Node targetNode, string property, T defaultValue)
+        public JankyProperty(Node targetNode, string property, T defaultValue)
         {
             DataContextMember = property.IsNullOrWhiteSpace() ? null : property;
             TargetNode = targetNode;
             _defaultValue = defaultValue;
         }
 
-        public DataContextProperty(Node targetNode, string property)
-        {
-            DataContextMember = property.IsNullOrWhiteSpace() ? null : property;
-            TargetNode = targetNode;
-        }
-
-        public DataContextProperty(T value)
+        public JankyProperty(T value)
         {
             TargetNode = null;
             DataContextMember = null;
@@ -42,7 +39,7 @@ namespace JankyUI.Binding
             _internalValue = value;
         }
 
-        public DataContextProperty()
+        public JankyProperty()
         {
             TargetNode = null;
             DataContextMember = null;
@@ -59,18 +56,21 @@ namespace JankyUI.Binding
             var op = stack.GetDataContextMember<T>(DataContextMember, out var value);
             switch (op)
             {
-                case JankyDataContextStack.DataContextOperationResult.Success:
+                case DataOperationResultEnum.Success:
+                    LastGetResult = (!Equals(_internalValue, value))
+                        ? op
+                        : DataOperationResultEnum.Unchanged;
                     return _internalValue = value;
-                case JankyDataContextStack.DataContextOperationResult.PropertyNull:
-                case JankyDataContextStack.DataContextOperationResult.TargetNull:
+                case DataOperationResultEnum.PropertyNull:
+                case DataOperationResultEnum.TargetNull:
                     return _defaultValue;
-                case JankyDataContextStack.DataContextOperationResult.MissingAcessor:
+                case DataOperationResultEnum.MissingAcessor:
                     Console.WriteLine("Property has no Getter: {0}", DataContextMember);
                     return _defaultValue;
                 default:
                     throw new ArgumentOutOfRangeException("Invalid Data Operation");
             }
-            
+
         }
 
         private void SetValue(T value)
@@ -84,36 +84,39 @@ namespace JankyUI.Binding
             if (!Equals(_internalValue, value))
             {
                 var stack = TargetNode.Context.DataContextStack;
-                var op = stack.SetDataContextMember<T>(DataContextMember, value);
-                switch (op)
+                LastSetResult = stack.SetDataContextMember<T>(DataContextMember, value);
+                switch (LastSetResult)
                 {
-                    case JankyDataContextStack.DataContextOperationResult.Success:
-                    case JankyDataContextStack.DataContextOperationResult.TargetNull:
+                    case DataOperationResultEnum.Success:
+                    case DataOperationResultEnum.TargetNull:
                         _internalValue = value;
                         return;
-                    case JankyDataContextStack.DataContextOperationResult.MissingAcessor:
+                    case DataOperationResultEnum.MissingAcessor:
                         Console.WriteLine("Property has no Setter: {0}", DataContextMember);
                         _internalValue = value;
                         return;
                     default:
                         throw new ArgumentOutOfRangeException("Invalid Data Operation");
                 }
+            }else
+            {
+                LastSetResult = DataOperationResultEnum.Unchanged;
             }
         }
 
-        public static explicit operator DataContextProperty<T>(T value)
+        public static explicit operator JankyProperty<T>(T value)
         {
-            return new DataContextProperty<T>(null, null, default(T));
+            return new JankyProperty<T>(null, null, default(T));
         }
 
-        public static implicit operator T(DataContextProperty<T> binding)
+        public static implicit operator T(JankyProperty<T> binding)
         {
             return binding.Value;
         }
 
         public override string ToString()
         {
-            return Value?.ToString() ?? "null";
+            return (Value?.ToString() ?? "null");
         }
     }
 }

@@ -7,13 +7,15 @@ using UnityEngine;
 namespace JankyUI.Nodes
 {
     [JankyProperty("data-context", nameof(DataContextName))]
+    [JankyProperty("style", nameof(Style))]
     internal class Node
     {
-        public List<Node> Children { get; set; }
-        public JankyNodeContext Context { get; set; }
-
+        public readonly Binding.JankyProperty<GUIStyle> Style;
         public readonly string DataContextName;
 
+        public List<Node> Children { get; set; }
+        public JankyNodeContext Context { get; set; }
+    
         public virtual GUISkin Skin
         {
             get

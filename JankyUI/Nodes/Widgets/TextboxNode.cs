@@ -1,64 +1,75 @@
 ﻿using System;
 using JankyUI.Attributes;
 using JankyUI.Binding;
+using JankyUI.Enums;
 using UnityEngine;
 
 namespace JankyUI.Nodes
 {
+
     [JankyTag("Textbox")]
     [JankyProperty("text", nameof(Text), DefaultValue = "")]
     [JankyProperty("type", nameof(Type), DefaultValue = "simple")]
     [JankyProperty("mask", nameof(Mask), DefaultValue = "*")]
-    [JankyProperty("length", nameof(Length), DefaultValue = "0")]
+    [JankyProperty("max-length", nameof(Length), DefaultValue = "0")]
+    [JankyProperty("on-change", nameof(OnChange))]
     internal class TextboxNode : LayoutNode
     {
-        public enum TextBoxTypeEnum
-        {
-            Simple,
-            Multiline,
-            Password
-        }
-
-        public readonly DataContextProperty<string> Text;
-        public readonly DataContextProperty<TextBoxTypeEnum> Type;
-        public readonly DataContextProperty<char> Mask;
-        public readonly DataContextProperty<int> Length;
+        public readonly JankyProperty<string> Text;
+        public readonly JankyProperty<TextBoxTypeEnum> Type;
+        public readonly JankyProperty<char> Mask;
+        public readonly JankyProperty<int> Length;
+        public readonly JankyMethod<Action<string>> OnChange;
 
         protected override void OnGUI()
         {
+#if MOCK
+            Console.WriteLine("Textbox: {0} {1} {2} {3}", Text, Type, Mask, Length);
+#else
+
+            string value = Text.Value;
+            GUILayoutOption[] layoutOptions = GetLayoutOptions();
+            int length = Length;
+            char mask = Mask;
+
             if (Length <= 0)
             {
                 switch (Type.Value)
                 {
                     case TextBoxTypeEnum.Simple:
-                        Text.Value = GUILayout.TextField(Text, GetLayoutOptions());
+                        value = GUILayout.TextField(value, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Multiline:
-                        Text.Value = GUILayout.TextArea(Text, GetLayoutOptions());
+                        value = GUILayout.TextArea(value, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Password:
-                        Text.Value = GUILayout.PasswordField(Text, Mask, GetLayoutOptions());
+                        value = GUILayout.PasswordField(value, mask, layoutOptions);
                         break;
                 }
-            }else
+            }
+            else
             {
                 switch (Type.Value)
                 {
                     case TextBoxTypeEnum.Simple:
-                        Text.Value = GUILayout.TextField(Text, Length, GetLayoutOptions());
+                        value = GUILayout.TextField(value, length, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Multiline:
-                        Text.Value = GUILayout.TextArea(Text, Length, GetLayoutOptions());
+                        value = GUILayout.TextArea(value, length, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Password:
-                        Text.Value = GUILayout.PasswordField(Text, Mask, Length, GetLayoutOptions());
+                        value = GUILayout.PasswordField(value, mask, length, layoutOptions);
                         break;
                 }
             }
+
+            if (Text.LastSetResult != DataOperationResultEnum.Unchanged)
+                OnChange.Invoke(value);
+#endif
         }
     }
 }

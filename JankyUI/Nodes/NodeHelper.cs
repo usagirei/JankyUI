@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -39,14 +40,14 @@ namespace JankyUI.Nodes
             }
         }
 
+
+
         private Action<Node, string> MakeJankyPropertySetter(string targetProp)
         {
             var prop = Properties.First(x => x.Name.Equals(targetProp, StringComparison.OrdinalIgnoreCase));
-            var memberName = prop.Target;
-            var targetType = NodeType;
 
             const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            var member_info = targetType.GetMember(memberName, flags).First();
+            var member_info = NodeType.GetMember(prop.Target, flags).First();
 
             MethodInfo setterMethod;
             switch (member_info)
@@ -71,95 +72,167 @@ namespace JankyUI.Nodes
                     throw new Exception("Member is not Supported");
             }
 
-            var setterDelegate = BindingUtils.MakeCompatibleDelegate<Action<Node, object>>(setterMethod, targetType);
-            var propType = setterMethod.GetParameters().Last().ParameterType;
+            var setterDelegate = BindingUtils.MakeCompatibleDelegate<Action<Node, object>>(setterMethod, NodeType);
+            var propertyType = setterMethod.GetParameters().Last().ParameterType;
 
-            if (propType.IsSubclassOfRawGeneric(typeof(DataContextProperty<>)))
+            if (propertyType.IsSubclassOfRawGeneric(typeof(JankyProperty<>)))
             {
-                var innerType = propType.GetGenericArguments()[0];
-                var innerConverter = TypeDescriptor.GetConverter(innerType);
-                return (node, value) =>
+                var __wrapper__ = propertyType;
+                var __dataType__ = __wrapper__.GetGenericArguments()[0];
+                var __converter__ = TypeDescriptor.GetConverter(__dataType__);
+                if(!prop.DefaultValue.TryConvertTo(__dataType__, out var __defaultValue__))
                 {
+                    Console.WriteLine("Invalid Default Value for Property {0} in {1}", prop.Name, NodeType);
+                }
+
+                return (node, sourceValue) =>
+                {
+                    bool escapedSpecialName = false;
+                    if (sourceValue?.StartsWith("@@") == true || sourceValue?.StartsWith("##") == true)
+                    {
+                        sourceValue = sourceValue.Substring(1);
+                        escapedSpecialName = true;
+                    }
+
                     object instance;
-                    if (value.IsNullOrWhiteSpace())
+                    // No Value Provided
+                    if (sourceValue == null)
                     {
-                        instance = prop.DefaultValue == null
-                            ? Activator.CreateInstance(propType)
-                            : Activator.CreateInstance(propType, innerConverter.ConvertFromString(prop.DefaultValue));
+                        instance = Activator.CreateInstance(__wrapper__, __defaultValue__);
                     }
-                    else if (value.StartsWith("@"))
+                    // Method Binding
+                    else if (!escapedSpecialName && sourceValue.StartsWith("@"))
                     {
-                        instance = prop.DefaultValue == null
-                            ? Activator.CreateInstance(propType, node, value.Substring(1))
-                            : Activator.CreateInstance(propType, node, value.Substring(1), innerConverter.ConvertFromString(prop.DefaultValue));
+                        // Strip @ Sign
+                        var memberName = sourceValue.Substring(1);
+
+                        instance = Activator.CreateInstance(__wrapper__, node, memberName, __defaultValue__);
                     }
-                    else
+                    // Static Resource
+                    else if (!escapedSpecialName && sourceValue.StartsWith("#"))
                     {
-                        if (innerType.IsArray)
+                        var resourceKey = sourceValue.Substring(1);
+
+                        // Key not Present
+                        if (!node.Context.Resources.TryGetValue(resourceKey, out var resource))
                         {
-                            var values = value.SplitEx('\\', ',');
-                            var elementType = innerType.GetElementType();
-                            var elemConverter = TypeDescriptor.GetConverter(elementType);
-                            var array = (Array)Activator.CreateInstance(elementType.MakeArrayType(), values.Length);
-                            for (int i = 0; i < values.Length; i++)
-                                array.SetValue(elemConverter.ConvertFromString(values[i]), i);
-                            instance = Activator.CreateInstance(propType, new[] { array });
+                            Console.WriteLine("Resource Key not Found: {0}", resourceKey);
+                            instance = Activator.CreateInstance(__wrapper__, __defaultValue__);
                         }
                         else
                         {
-                            var innerValue = innerConverter.ConvertFromString(value);
-                            instance = Activator.CreateInstance(propType, innerValue);
+                            // Resource is set to null
+                            if (resource == null && __dataType__.IsValueType)
+                            {
+                                resource = Activator.CreateInstance(__dataType__);
+                            }
+                            // Resource is string, but target type isnt, Try Converting
+                            else if (resource.GetType() == typeof(string)
+                                && __dataType__ != typeof(string)
+                                && !((string)resource).TryConvertTo(__dataType__, out resource))
+                            {
+                                Console.WriteLine("Can't convert Resource String {0} to Target Type {1}", resourceKey, __dataType__);
+                                resource = __defaultValue__;
+                            }
+                            //Else Resource is (probably) same type as target
+                            instance = Activator.CreateInstance(__wrapper__, resource);
+                        }
+                    }
+                    else
+                    {
+                        // Direct Set
+                        if (__dataType__ == typeof(string))
+                        {
+                            instance = Activator.CreateInstance(__wrapper__, sourceValue);
+                        }
+                        // Convert and Set
+                        else
+                        {
+                            if (!sourceValue.TryConvertTo(__dataType__, out var converted))
+                            {
+                                Console.WriteLine("Can't convert String '{0}' to Target Type '{1}'", sourceValue, __dataType__);
+                                converted = __defaultValue__;
+                            }
+                            instance = Activator.CreateInstance(__wrapper__, converted);
                         }
                     }
                     setterDelegate(node, instance);
                 };
             }
-            else if (propType.IsSubclassOfRawGeneric(typeof(DataContextMethod<>)))
+            else if (propertyType.IsSubclassOfRawGeneric(typeof(JankyMethod<>)))
             {
                 return (node, value) =>
                 {
                     object instance;
                     if (value.IsNullOrWhiteSpace())
                     {
+                        instance = Activator.CreateInstance(propertyType);
+                    }
+                    else if (!value.StartsWith("@") || value.StartsWith("@@"))
+                    {
+                        instance = Activator.CreateInstance(propertyType);
+#if DEBUG
+                        throw new NotSupportedException("Method Bindings can't be static values");
+#else
+                        Console.WriteLine("Method Bindings can't be static values");
                         instance = Activator.CreateInstance(propType);
+#endif
                     }
                     else
                     {
-                        instance = value.StartsWith("@")
-                            ? Activator.CreateInstance(propType, node, value.Substring(1))
-                            : Activator.CreateInstance(propType, node, value);
+                        value = value.Substring(1);
+
+                        instance = Activator.CreateInstance(propertyType, node, value);
                     }
-                    propType.GetMethod("Validate", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(instance, null);
+                    //propType.GetMethod("Validate", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(instance, null);
                     setterDelegate(node, instance);
                 };
             }
             else
             {
-                var converter = TypeDescriptor.GetConverter(propType);
+                var converter = TypeDescriptor.GetConverter(propertyType);
                 return (node, value) =>
                 {
+                    bool escapedSpecialName = false;
+                    if (value?.StartsWith("@@") == true || value?.StartsWith("##") == true)
+                    {
+                        value = value.Substring(1);
+                        escapedSpecialName = true;
+                    }
+
                     object instance;
                     if (value.IsNullOrWhiteSpace())
                     {
-                        instance = (propType.IsValueType)
-                            ? Activator.CreateInstance(propType)
+                        instance = (propertyType.IsValueType)
+                            ? Activator.CreateInstance(propertyType)
                             : null;
+                    }
+                    else if (!escapedSpecialName && value.StartsWith("@"))
+                    {
+                        throw new NotSupportedException("Normal Properties don't support Binding");
+                    }
+                    else if (!escapedSpecialName && value.StartsWith("#"))
+                    {
+                        throw new NotImplementedException();
                     }
                     else
                     {
-                        if (propType.IsArray)
+                        if (propertyType.IsArray)
                         {
                             var values = value.SplitEx('\\', ',');
-                            var elementType = propType.GetElementType();
+                            var elementType = propertyType.GetElementType();
                             var elemConverter = TypeDescriptor.GetConverter(elementType);
                             var array = (Array)Activator.CreateInstance(elementType.MakeArrayType(), values.Length);
                             for (int i = 0; i < values.Length; i++)
-                                array.SetValue(elemConverter.ConvertFrom(values[i]), i);
-                            instance = Activator.CreateInstance(propType, new[] { array });
+                            {
+                                var converted = elemConverter.ConvertFromInvariantString(values[i]);
+                                array.SetValue(converted, i);
+                            }
+                            instance = Activator.CreateInstance(propertyType, new[] { array });
                         }
                         else
                         {
-                            instance = converter.ConvertFrom(value);
+                            instance = converter.ConvertFromInvariantString(value);
                         }
                     }
                     setterDelegate(node, instance);
@@ -217,7 +290,8 @@ namespace JankyUI.Nodes
 
         public static NodeHelper Instance
         {
-            get {
+            get
+            {
                 return _instance ?? (_instance = new NodeHelper(typeof(TNode)));
             }
         }

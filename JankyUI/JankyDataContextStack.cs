@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JankyUI.Binding;
+using JankyUI.Enums;
 using JankyUI.Nodes;
 using UnityEngine;
 
 namespace JankyUI
 {
-
-
     internal class JankyDataContextStack
     {
         private Dictionary<(Type, String), (Func<object, object>, Action<object, object>)> _acessorCache
@@ -87,24 +86,24 @@ namespace JankyUI
             }
         }
 
-        public DataContextOperationResult GetDataContextMember<T>(string memberName, out T value)
+        public DataOperationResultEnum GetDataContextMember<T>(string memberName, out T value)
         {
             value = default(T);
 
             var curCtx = Stack.Peek();
             if (curCtx == null)
-                return DataContextOperationResult.TargetNull;
+                return DataOperationResultEnum.TargetNull;
 
             GetAcessorFor(curCtx.GetType(), memberName, out var getter, out _);
             if (getter == null)
-                return DataContextOperationResult.MissingAcessor;
+                return DataOperationResultEnum.MissingAcessor;
 
             var retVal = getter(curCtx);
             if (retVal == null)
-                return DataContextOperationResult.TargetNull;
+                return DataOperationResultEnum.TargetNull;
 
             value = (T)retVal;
-            return DataContextOperationResult.Success;
+            return DataOperationResultEnum.Success;
         }
 
         public void Pop()
@@ -128,26 +127,19 @@ namespace JankyUI
                 Stack.Push(getter(curCtx));
             }
         }
-        public DataContextOperationResult SetDataContextMember<T>(string memberName, T value)
+        public DataOperationResultEnum SetDataContextMember<T>(string memberName, T value)
         {
             var curCtx = Stack.Peek();
             if (curCtx == null)
-                return DataContextOperationResult.TargetNull;
+                return DataOperationResultEnum.TargetNull;
 
             GetAcessorFor(curCtx.GetType(), memberName, out _, out var setter);
             if (setter == null)
-                return DataContextOperationResult.MissingAcessor;
+                return DataOperationResultEnum.MissingAcessor;
 
             setter(curCtx, value);
-            return DataContextOperationResult.Success;
+            return DataOperationResultEnum.Success;
         }
 
-        public enum DataContextOperationResult
-        {
-            Success,
-            TargetNull,
-            MissingAcessor,
-            PropertyNull
-        }
     }
 }

@@ -1,5 +1,7 @@
-﻿using JankyUI.Attributes;
+﻿using System;
+using JankyUI.Attributes;
 using JankyUI.Binding;
+using JankyUI.Enums;
 using UnityEngine;
 
 namespace JankyUI.Nodes
@@ -17,19 +19,19 @@ namespace JankyUI.Nodes
     }
 
     [JankyTag("Group")]
-    [JankyProperty("type", nameof(Type), DefaultValue = "Horizontal")]
+    [JankyProperty("type", nameof(Type), DefaultValue = "horizontal")]
     internal class GroupNode : LayoutNode
     {
-        public readonly DataContextProperty<GroupTypeEnum> Type;
-
-        public enum GroupTypeEnum
-        {
-            Horizontal,
-            Vertical,
-        }
+        public readonly JankyProperty<GroupTypeEnum> Type;
 
         protected override void OnGUI()
         {
+#if MOCK
+            Console.WriteLine("Begin GroupNode: {0}", Type);
+            foreach (var child in Children)
+                child.Execute();
+            Console.Write("End ScrollView");
+#else
             switch (Type.Value)
             {
                 case GroupTypeEnum.Horizontal:
@@ -54,6 +56,7 @@ namespace JankyUI.Nodes
                     }
                     break;
             }
+#endif
         }
     }
 }

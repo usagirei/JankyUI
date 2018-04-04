@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -29,13 +29,22 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug - Mock|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug - Mock\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MOCK</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\lib\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -49,13 +58,15 @@
     <Compile Include="Attributes\JankyDefaultOverrideAttribute.cs" />
     <Compile Include="Attributes\JankyPropertyAttribute.cs" />
     <Compile Include="Binding\BindingUtils.cs" />
-    <Compile Include="Binding\MethodBinding.cs" />
-    <Compile Include="Binding\PropertyBinding.cs" />
+    <Compile Include="Binding\JankyMethod.cs" />
+    <Compile Include="Binding\JankyProperty.cs" />
     <Compile Include="IJankyContext.cs" />
     <Compile Include="JankyContext.cs" />
     <Compile Include="JankyDataContextStack.cs" />
     <Compile Include="JankyUIGenerator.cs" />
     <Compile Include="Nodes\Containers\AreaNode.cs" />
+    <Compile Include="Enums\GroupTypeEnum.cs" />
+    <Compile Include="Enums\ExpandModeEnum.cs" />
     <Compile Include="Nodes\Widgets\LabelNode.cs" />
     <Compile Include="Nodes\Containers\ScrollViewNode.cs" />
     <Compile Include="Nodes\Containers\GroupNode.cs" />
@@ -63,19 +74,27 @@
     <Compile Include="Nodes\NodeHelper.cs" />
     <Compile Include="Nodes\LayoutNode.cs" />
     <Compile Include="Nodes\Widgets\ScrollBarNode.cs" />
-    <Compile Include="Nodes\Widgets\SelectionGridNode.cs" />
+    <Compile Include="Enums\ScrollBarTypeEnum.cs" />
+    <Compile Include="Nodes\Widgets\SelectNode.cs" />
     <Compile Include="Nodes\Widgets\SliderNode.cs" />
+    <Compile Include="Enums\SliderTypeEnum.cs" />
     <Compile Include="Nodes\Widgets\SpaceNode.cs" />
     <Compile Include="Nodes\Widgets\TextboxNode.cs" />
     <Compile Include="Nodes\Widgets\ButtonNode.cs" />
     <Compile Include="Attributes\JankyTagAttribute.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Nodes\Widgets\ToggleNode.cs" />
-    <Compile Include="Nodes\Widgets\ToolbarNode.cs" />
+    <Compile Include="Nodes\Widgets\CheckboxNode.cs" />
+    <Compile Include="Enums\OpResult.cs" />
+    <Compile Include="Enums\TextBoxTypeEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Nodes\Containers\WindowNode.cs" />
     <Compile Include="Compat\ValueTuple`2.cs" />
+    <Compile Include="TextureConverter.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Schema.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -8,14 +8,14 @@ namespace JankyUI.Nodes
     [JankyTag("Button")]
     [JankyProperty("text", nameof(Text))]
     [JankyProperty("image", nameof(Image))]
-    [JankyProperty("onClick", nameof(OnClick))]
+    [JankyProperty("on-click", nameof(OnClick))]
     [JankyProperty("repeat", nameof(IsRepeat))]
     internal class ButtonNode : LayoutNode
     {
-        public readonly DataContextMethod<Action> OnClick;
-        public readonly DataContextProperty<string> Text;
-        public readonly DataContextProperty<bool> IsRepeat;
-        public readonly DataContextProperty<Texture> Image;
+        public readonly JankyMethod<Action> OnClick;
+        public readonly JankyProperty<string> Text;
+        public readonly JankyProperty<bool> IsRepeat;
+        public readonly JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
 
@@ -32,6 +32,10 @@ namespace JankyUI.Nodes
 
         protected override void OnGUI()
         {
+#if MOCK
+            UpdateContent();
+            Console.WriteLine("Button: {0} {1}", Text, IsRepeat);
+#else
             UpdateContent();
             if (IsRepeat?.Value ?? false)
             {
@@ -43,6 +47,7 @@ namespace JankyUI.Nodes
                 if (GUILayout.Button(Content, GetLayoutOptions()))
                     OnClick.Invoke();
             }
+#endif
         }
     }
 }

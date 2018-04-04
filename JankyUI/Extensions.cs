@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -10,7 +11,9 @@ namespace JankyUI
     {
         public static bool IsNullOrWhiteSpace(this string value)
         {
-            if (value == null) return true;
+            if (value == null)
+                return true;
+
             return string.IsNullOrEmpty(value.Trim());
         }
 
@@ -64,7 +67,75 @@ namespace JankyUI
                 }
             }
 
+            if (input.Length == 0)
+                return new string[0];
+
             return Enumerate().ToArray();
+        }
+
+        public static TypeConverter GetConverter(this Type type)
+        {
+            if (type == typeof(UnityEngine.Texture))
+                return TextureConverter.Instance;
+            if (type == typeof(UnityEngine.Texture2D))
+                return TextureConverter.Instance;
+            return TypeDescriptor.GetConverter(type);
+        }
+
+        public static bool TryConvertTo(this string input, Type type, out object output, char arraySeparator = ';')
+        {
+            try
+            {
+                if (input == null)
+                {
+                    output = type.IsValueType ? Activator.CreateInstance(type) : null;
+                    return true;
+                }
+
+                if (type.IsArray)
+                {
+                    var elemType = type.GetElementType();
+                    var converter = elemType.GetConverter();
+                    var elements = input.SplitEx('\\', arraySeparator);
+
+                    if (elemType == typeof(string))
+                    {
+                        output = elements;
+                        return true;
+                    }
+
+                    var array = (Array)Activator.CreateInstance(type, elements.Length);
+                    for (int i = 0; i < elements.Length; i++)
+                    {
+                        var converted = converter.ConvertFromInvariantString(elements[i]);
+                        array.SetValue(converted, i);
+                    }
+                    output = array;
+                    return true;
+                }
+                else
+                {
+                    var converter = type.GetConverter();
+                    output = converter.ConvertFromInvariantString(input);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                output = type.IsValueType ? Activator.CreateInstance(type) : null;
+                return false;
+            }
+        }
+
+        public static bool TryConvertTo<T>(this string input, out T output, char arraySeparator = ';')
+        {
+            output = default(T);
+            if (!TryConvertTo(input, typeof(T), out var cvt, arraySeparator))
+                return false;
+
+            output = (T)cvt;
+            return true;
         }
 
         public static bool IsCompatibleWithDelegate<TDelegate>(this MethodInfo method)

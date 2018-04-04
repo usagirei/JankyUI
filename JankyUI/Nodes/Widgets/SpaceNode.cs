@@ -1,4 +1,5 @@
-﻿using JankyUI.Attributes;
+﻿using System;
+using JankyUI.Attributes;
 using JankyUI.Binding;
 using UnityEngine;
 
@@ -8,14 +9,18 @@ namespace JankyUI.Nodes
     [JankyProperty("size", nameof(Size), DefaultValue = "NaN")]
     internal class SpaceNode : Node
     {
-        public readonly DataContextProperty<float> Size;
+        public readonly JankyProperty<float> Size;
 
         protected override void OnGUI()
         {
+#if MOCK
+            Console.WriteLine("Space: {0}", Size);
+#else
             if (float.IsNaN(Size))
                 GUILayout.FlexibleSpace();
             else
                 GUILayout.Space(Size);
+#endif
         }
     }
 }

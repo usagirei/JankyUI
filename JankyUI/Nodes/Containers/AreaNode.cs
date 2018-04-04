@@ -1,4 +1,5 @@
-﻿using JankyUI.Attributes;
+﻿using System;
+using JankyUI.Attributes;
 using JankyUI.Binding;
 using UnityEngine;
 
@@ -11,10 +12,10 @@ namespace JankyUI.Nodes
     [JankyProperty("height", nameof(Height))]
     internal class AreaNode : Node
     {
-        public readonly DataContextProperty<float> X;
-        public readonly DataContextProperty<float> Y;
-        public readonly DataContextProperty<float> Width;
-        public readonly DataContextProperty<float> Height;
+        public readonly JankyProperty<float> X;
+        public readonly JankyProperty<float> Y;
+        public readonly JankyProperty<float> Width;
+        public readonly JankyProperty<float> Height;
 
         public Rect AreaRect
         {
@@ -33,12 +34,19 @@ namespace JankyUI.Nodes
 
         protected override void OnGUI()
         {
+#if MOCK
+            Console.WriteLine("Begin Area: {0} {1} {2} {3}", X, Y, Width, Height);
+            foreach (var child in Children)
+                child.Execute();
+            Console.WriteLine("End Area");
+#else
             GUILayout.BeginArea(AreaRect);
 
             foreach (var child in Children)
                 child.Execute();
 
             GUILayout.EndArea();
+#endif
         }
     }
 }

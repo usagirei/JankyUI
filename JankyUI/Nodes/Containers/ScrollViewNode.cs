@@ -1,16 +1,17 @@
-﻿using JankyUI.Attributes;
+﻿using System;
+using JankyUI.Attributes;
 using JankyUI.Binding;
 using UnityEngine;
 
 namespace JankyUI.Nodes
 {
     [JankyTag("ScrollView")]
-    [JankyProperty("scroll-x", nameof(ScrollX))]
-    [JankyProperty("scroll-y", nameof(ScrollY))]
+    [JankyProperty("x-offset", nameof(ScrollX))]
+    [JankyProperty("y-offset", nameof(ScrollY))]
     internal class ScrollViewNode : LayoutNode
     {
-        public readonly DataContextProperty<float> ScrollX;
-        public readonly DataContextProperty<float> ScrollY;
+        public readonly JankyProperty<float> ScrollX;
+        public readonly JankyProperty<float> ScrollY;
 
         private Vector2 ScrollPos
         {
@@ -27,12 +28,19 @@ namespace JankyUI.Nodes
 
         protected override void OnGUI()
         {
+#if MOCK
+            Console.WriteLine("Begin ScrollView: {0} {1}", ScrollX, ScrollY);
+            foreach (var child in Children)
+                child.Execute();
+            Console.Write("End ScrollView");
+#else
             ScrollPos = GUILayout.BeginScrollView(ScrollPos, GetLayoutOptions());
 
             foreach (var child in Children)
                 child.Execute();
 
             GUILayout.EndScrollView();
+#endif
         }
     }
 }

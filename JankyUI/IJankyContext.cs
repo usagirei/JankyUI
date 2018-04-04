@@ -9,6 +9,8 @@ namespace JankyUI
 
         GUISkin Skin { get; set; }
 
+        int WindowID { get; }
+
         void OnGUI();
     }
 }
