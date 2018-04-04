@@ -1,0 +1,375 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Schema"
+    targetNamespace="janky://Schema"
+    xmlns:jank="janky://Schema"
+    elementFormDefault="unqualified"
+    attributeFormDefault="unqualified"
+    version="1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Enums -->
+  <xs:simpleType name="Enum-ButtonType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="normal" />
+      <xs:enumeration value="repeat" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="Enum-TextboxType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="simple" />
+      <xs:enumeration value="multiline" />
+      <xs:enumeration value="password" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Enum-GroupType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="horizontal" />
+      <xs:enumeration value="vertical" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Enum-ScrollbarType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="horizontal" />
+      <xs:enumeration value="vertical" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="Enum-StretchType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none" />
+      <xs:enumeration value="vertical" />
+      <xs:enumeration value="horizontal" />
+      <xs:enumeration value="both" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <!-- Identifier Types -->
+  
+  <xs:simpleType name="Identifier">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z_][a-zA-Z0-9_]*"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>  
+    
+  <xs:simpleType name="Resource">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="#[a-zA-Z_][a-zA-Z0-9_]*"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="Binding">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="@[a-zA-Z_][a-zA-Z0-9_]*"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <!-- Custom String Type (## and @@) -->
+  
+  <xs:simpleType name="String">
+     <xs:restriction base="xs:string">
+       <xs:pattern value="([^@#]|##|@@).*" />
+     </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Char">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([^@#]|@@|##|.)" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <!-- Common Attribute Types -->
+
+  <xs:simpleType name="Attr-Resource" >
+    <xs:union memberTypes="jank:Binding" />
+  </xs:simpleType>
+  
+  <xs:simpleType name="Attr-Bindable" >
+    <xs:union memberTypes="jank:Binding" />
+  </xs:simpleType>
+
+  <!-- Object -->
+
+  <xs:simpleType name="Attr-Resource-Bindable" >
+    <xs:union memberTypes="jank:Resource jank:Binding" />
+  </xs:simpleType>
+  
+  <!-- Char -->
+  
+  <xs:simpleType name="Attr-Char-Resource-Bindable">
+    <xs:union memberTypes="jank:Char jank:Resource jank:Binding" />
+  </xs:simpleType>
+  
+  <!-- Text -->
+  
+  <xs:simpleType name="Attr-Text-Resource-Bindable">
+    <xs:union memberTypes="jank:String jank:Resource jank:Binding" />
+  </xs:simpleType>
+ 
+  <!-- Integer -->
+  
+  <xs:simpleType name="Attr-Integer-Resource-Bindable" >
+    <xs:union memberTypes="xs:integer jank:Resource jank:Binding" />
+  </xs:simpleType>
+  
+  <!-- Decimal -->
+  
+  <xs:simpleType name="Attr-Decimal-Resource-Bindable" >
+    <xs:union memberTypes="xs:decimal jank:Resource jank:Binding" />
+  </xs:simpleType>
+
+  <!-- Boolean -->
+
+  <xs:simpleType name="Attr-Bool-Resource-Bindable" >
+    <xs:union memberTypes="xs:boolean jank:Resource jank:Binding" />
+  </xs:simpleType>
+  
+  <!-- Nodes -->
+
+  <!-- Base Node Types -->
+  <xs:element name="Node" abstract="true" />
+  
+  <xs:complexType name="SimpleNode" abstract="true">
+    <xs:attribute name="data-context" type="jank:Attr-Bindable" />
+  </xs:complexType>
+
+  <xs:complexType name="SimpleNodeWithLayoutOptions" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="jank:SimpleNode">
+        <xs:attribute name="width" type="jank:Attr-Integer-Resource-Bindable" />
+        <xs:attribute name="min-width" type="jank:Attr-Integer-Resource-Bindable" />
+        <xs:attribute name="max-width" type="jank:Attr-Integer-Resource-Bindable" />
+
+        <xs:attribute name="height" type="jank:Attr-Integer-Resource-Bindable" />
+        <xs:attribute name="min-height" type="jank:Attr-Integer-Resource-Bindable" />
+        <xs:attribute name="max-height" type="jank:Attr-Integer-Resource-Bindable" />
+
+        <xs:attribute name="stretch">
+          <xs:simpleType>
+            <xs:union memberTypes="jank:Enum-StretchType jank:Resource jank:Binding" />
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="ComplexNode" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="jank:SimpleNode">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="jank:Node" />
+        </xs:choice>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="ComplexNodeWithLayoutOptions" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="jank:Node" />
+        </xs:choice>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Widgets -->
+  
+  <xs:element name="Button" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="text" type="jank:Attr-Text-Resource-Bindable" />
+          <xs:attribute name="image" type="jank:Attr-Resource-Bindable" />
+          <xs:attribute name="on-click" type="jank:Attr-Bindable" use="required" />
+          <xs:attribute name="type" use="optional">
+            <xs:simpleType>
+              <xs:union memberTypes="jank:Enum-ButtonType jank:Attr-Resource jank:Attr-Bindable" />
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>    
+  </xs:element>
+
+  <xs:element name="Label" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="text" type="jank:Attr-Text-Resource-Bindable" />
+          <xs:attribute name="image" type="jank:Attr-Resource-Bindable" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ScrollBar" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="size" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="value" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="min-value" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="max-value" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="on-change" type="jank:Attr-Resource-Bindable" />
+          <xs:attribute name="type">
+            <xs:simpleType>
+              <xs:union memberTypes="jank:Enum-ScrollbarType jank:Attr-Resource jank:Attr-Bindable" />
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Select" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="items" type="jank:Attr-Text-Resource-Bindable" use="required" />
+          <xs:attribute name="columns" type="jank:Attr-Integer-Resource-Bindable" />
+          <xs:attribute name="selected-index" type="jank:Attr-Integer-Resource-Bindable" />
+          <xs:attribute name="on-change" type="jank:Attr-Bindable" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Slider" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="items" type="jank:Attr-Text-Resource-Bindable" use="required" />
+          <xs:attribute name="columns" type="jank:Attr-Integer-Resource-Bindable" />
+          <xs:attribute name="selected-index" type="jank:Attr-Integer-Resource-Bindable" />
+          <xs:attribute name="on-change" type="jank:Attr-Bindable" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Space" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="size" type="jank:Attr-Decimal-Resource-Bindable" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Textbox" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="text" type="jank:Attr-Text-Resource-Bindable" use="required" />
+          <xs:attribute name="mask" type="jank:Attr-Char-Resource-Bindable" />
+          <xs:attribute name="max-lenght" type="jank:Attr-Integer-Resource-Bindable" />
+          <xs:attribute name="on-change" type="jank:Attr-Bindable" use="optional" />
+          <xs:attribute name="type">
+            <xs:simpleType>
+              <xs:union memberTypes="jank:Enum-TextboxType jank:Attr-Resource jank:Attr-Bindable" />
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Checkbox" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="checked" type="jank:Attr-Bool-Resource-Bindable" />
+          <xs:attribute name="text" type="jank:Attr-Text-Resource-Bindable" />
+          <xs:attribute name="on-change" type="jank:Attr-Bindable" use="optional" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Containers -->
+  
+  <xs:element name="ScrollView">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:ComplexNodeWithLayoutOptions">
+          <xs:attribute name="x-offset" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="y-offset" type="jank:Attr-Decimal-Resource-Bindable" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Group" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:ComplexNodeWithLayoutOptions">
+          <xs:attribute name="type" use="optional" >
+            <xs:simpleType>
+              <xs:union memberTypes="jank:Enum-GroupType jank:Attr-Resource jank:Attr-Bindable" />
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Area" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:ComplexNode">
+          <xs:attribute name="width" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="height" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="x" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="y" type="jank:Attr-Decimal-Resource-Bindable" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Window">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:ComplexNode">
+          <xs:attribute name="title" type="jank:Attr-Text-Resource-Bindable" />
+          <xs:attribute name="mouse-enter" type="jank:Attr-Bindable" />
+          <xs:attribute name="mouse-leave" type="jank:Attr-Bindable" />
+
+          <xs:attribute name="width" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="height" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="x" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="y" type="jank:Attr-Decimal-Resource-Bindable" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Janky XML -->
+  
+  <xs:element name="Resource">
+    <xs:complexType>
+      <xs:attribute name="key" type="jank:Identifier" />
+      <xs:attribute name="value" type="xs:string" />
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Resources">
+     <xs:complexType>
+       <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="jank:Resource" />
+       </xs:choice>
+     </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="JankyUI">
+    <xs:complexType>
+      <xs:all>
+        <xs:element ref="jank:Resources" minOccurs="0" />
+        <xs:element ref="jank:Window" minOccurs="1" />
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
