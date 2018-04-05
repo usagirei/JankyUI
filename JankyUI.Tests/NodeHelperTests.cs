@@ -134,7 +134,7 @@ namespace JankyUI.Tests
             if (__builtClassType__ == null)
             {
                 var jankPropType = typeof(Binding.JankyProperty<>).MakeGenericType(elemType);
-                _tb = _mb.DefineType(typeName, TypeAttributes.Class, typeof(Node));
+                _tb = _mb.DefineType(typeName, TypeAttributes.Class | TypeAttributes.Public, typeof(Node));
                 var ctor = typeof(Attributes.JankyPropertyAttribute).GetConstructor(new[] { typeof(string), typeof(string) });
                 _tb.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] { "jfield", "JankField" }));
                 _tb.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] { "jprop", "JankProperty" }));
