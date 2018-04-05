@@ -67,7 +67,8 @@ namespace JankyUI.Nodes
                 }
             }
 
-            if (Text.LastSetResult != DataOperationResultEnum.Unchanged)
+            Text.Value = value;
+            if (Text.LastSetResult == DataOperationResultEnum.Success)
                 OnChange.Invoke(value);
 #endif
         }
