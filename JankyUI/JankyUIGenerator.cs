@@ -38,12 +38,42 @@ namespace JankyUI
             var settings = xmlDoc.SelectSingleNode("/*[local-name() = 'JankyUI']/*[local-name() = 'Resources']");
             if (settings != null)
             {
-                // TODO: Array-Notation
                 foreach (XmlNode setting in settings.ChildNodes)
                 {
                     var key = setting.Attributes["key"].Value;
                     var value = setting.Attributes["value"].Value;
-                    ctx.Resources[key] = value;
+                    if (ctx.Resources.ContainsKey(key))
+                    {
+                        ctx.Resources[key] = ctx.Resources[key] + "|" + value;
+                    }
+                    else
+                    {
+                        ctx.Resources[key] = value;
+                    }
+                }
+
+                if (resources != null)
+                {
+                    // Replace with Overrides
+                    foreach (var kvp in resources)
+                    {
+                        if (ctx.Resources.ContainsKey(kvp.Key))
+                            ctx.Resources.Remove(kvp.Key);
+                    }
+
+                    foreach (var kvp in resources)
+                    {
+                        var key = kvp.Key;
+                        var value = kvp.Value;
+                        if (ctx.Resources.ContainsKey(key) && ctx.Resources[key] is string && value is string)
+                        {
+                            ctx.Resources[key] = ctx.Resources[key] + "|" + value;
+                        }
+                        else
+                        {
+                            ctx.Resources[key] = value;
+                        }
+                    }
                 }
             }
             var window = xmlDoc.SelectSingleNode("/*[local-name() = 'JankyUI']/*[local-name() = 'Window']");

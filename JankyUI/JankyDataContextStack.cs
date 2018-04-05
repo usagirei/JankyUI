@@ -100,7 +100,15 @@ namespace JankyUI
             if (getter == null)
                 return DataOperationResultEnum.MissingAcessor;
 
-            var retVal = getter(curCtx);
+            object retVal = null;
+            try
+            {
+                retVal = getter(curCtx);
+            }catch
+            {
+                return DataOperationResultEnum.TargetException;
+            }
+
             if (retVal == null)
                 return DataOperationResultEnum.TargetNull;
 
@@ -131,12 +139,22 @@ namespace JankyUI
                 }
                 else
                 {
-                    var next = getter(curCtx);
-                    if(next != null && !next.GetType().IsVisible)
+                    object next;
+                    try
                     {
-                        Console.WriteLine("[JankyStack] Property '{0}' is of Type '{1}', and the type is not public.", propertyName, next.GetType());
+                        next = getter(curCtx);
+                        if (next != null && !next.GetType().IsVisible)
+                        {
+                            Console.WriteLine("[JankyStack] Property '{0}' is of Type '{1}', and the type is not public.", propertyName, next.GetType());
+                            next = null;
+                        }
+                    }
+                    catch
+                    {
+                        Console.WriteLine("[JankyStack] Exception Thrown by Target Property '{0}'", propertyName);
                         next = null;
                     }
+
                     Stack.Push(next);
                 }
             }
@@ -153,7 +171,15 @@ namespace JankyUI
             if (setter == null)
                 return DataOperationResultEnum.MissingAcessor;
 
-            setter(curCtx, value);
+            try
+            {
+                setter(curCtx, value);
+            }
+            catch
+            {
+                return DataOperationResultEnum.TargetException;
+            }
+
             return DataOperationResultEnum.Success;
         }
 

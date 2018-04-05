@@ -82,7 +82,7 @@ namespace JankyUI
             return TypeDescriptor.GetConverter(type);
         }
 
-        public static bool TryConvertTo(this string input, Type type, out object output, char arraySeparator = ';')
+        public static bool TryConvertTo(this string input, Type type, out object output, char arraySeparator = '|')
         {
             try
             {

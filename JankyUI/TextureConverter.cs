@@ -52,6 +52,7 @@ namespace JankyUI
                         var resource = resources.FirstOrDefault(x => x.Name.Equals(resName, StringComparison.OrdinalIgnoreCase));
                         if (resource == null)
                             throw new Exception($"Resource not found: '{resName}'");
+
                         using (var stream = targetAssembly.GetManifestResourceStream(resource.TrueName))
                         {
 
@@ -63,7 +64,6 @@ namespace JankyUI
                             return tex;
                         }
                     }
-                    break;
                 default:
                     throw new NotSupportedException($"Scheme '{uri.Scheme}' not Supported");
             }

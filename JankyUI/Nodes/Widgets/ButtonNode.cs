@@ -33,11 +33,10 @@ namespace JankyUI.Nodes
 
         protected override void OnGUI()
         {
+            UpdateContent();
 #if MOCK
-            UpdateContent();
-            Console.WriteLine("Button: {0} {1}", Text, IsRepeat);
+            Console.WriteLine("Button: {0} {1}", Text, Type);
 #else
-            UpdateContent();
             if (Type.Value == ButtonTypeEnum.Repeat)
             {
                 if (GUILayout.RepeatButton(Content, GetLayoutOptions()))

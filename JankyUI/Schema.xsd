@@ -308,7 +308,8 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="items" type="jank:Attr-String" use="required" />
+          <xs:attribute name="texts" type="jank:Attr-String" use="optional" />
+          <xs:attribute name="images" type="jank:Attr-String" use="optional" />
           <xs:attribute name="columns" type="jank:Attr-Integer" />
           <xs:attribute name="selected-index" type="jank:Attr-Integer" />
           <xs:attribute name="on-change" type="jank:Attr-Method" />

@@ -17,6 +17,7 @@ namespace JankyUI.Binding
             Empty = BindingUtils.MakeEmptyDelegate<TDelegate>();
         }
 
+        // TODO: Try-Catch on JankyMethod Callers
         public TDelegate Invoke
         {
             get

@@ -5,6 +5,7 @@
         Success,
         Unchanged,
         TargetNull,
+        TargetException,
         MissingAcessor,
         PropertyNull
     }
