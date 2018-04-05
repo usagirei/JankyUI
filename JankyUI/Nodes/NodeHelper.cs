@@ -28,6 +28,12 @@ namespace JankyUI.Nodes
             _tags = new Dictionary<string, JankyTagAttribute>();
 
             NodeType = nodeType;
+
+            ReadJankyAttributes();
+        }
+
+        private void ReadJankyAttributes()
+        {
             _tags = NodeType.GetCustomAttributes<JankyTagAttribute>(false).ToDictionary(a => a.Name);
             _properties = NodeType.GetCustomAttributes<JankyPropertyAttribute>(true).ToDictionary(a => a.Name);
             var defaultOverrides = NodeType.GetCustomAttributes<JankyDefaultOverrideAttribute>(false);
@@ -39,8 +45,6 @@ namespace JankyUI.Nodes
                     throw new Exception("Unknown Property to Override: " + def.Property);
             }
         }
-
-
 
         private Action<Node, string> MakeJankyPropertySetter(string targetProp)
         {
@@ -94,11 +98,11 @@ namespace JankyUI.Nodes
                         escapedSpecialName = true;
                     }
 
-                    object instance;
+                    object targetValue;
                     // No Value Provided
                     if (sourceValue == null)
                     {
-                        instance = Activator.CreateInstance(__wrapper__, __defaultValue__);
+                        targetValue = Activator.CreateInstance(__wrapper__, __defaultValue__);
                     }
                     // Method Binding
                     else if (!escapedSpecialName && sourceValue.StartsWith("@"))
@@ -106,7 +110,7 @@ namespace JankyUI.Nodes
                         // Strip @ Sign
                         var memberName = sourceValue.Substring(1);
 
-                        instance = Activator.CreateInstance(__wrapper__, node, memberName, __defaultValue__);
+                        targetValue = Activator.CreateInstance(__wrapper__, node, memberName, __defaultValue__);
                     }
                     // Static Resource
                     else if (!escapedSpecialName && sourceValue.StartsWith("#"))
@@ -117,11 +121,11 @@ namespace JankyUI.Nodes
                         if (!node.Context.Resources.TryGetValue(resourceKey, out var resource))
                         {
                             Console.WriteLine("Resource Key not Found: {0}", resourceKey);
-                            instance = Activator.CreateInstance(__wrapper__, __defaultValue__);
+                            targetValue = Activator.CreateInstance(__wrapper__, __defaultValue__);
                         }
                         else
                         {
-                            // Resource is set to null
+                            // Resource is EXPLICITLY set to null
                             if (resource == null && __dataType__.IsValueType)
                             {
                                 resource = Activator.CreateInstance(__dataType__);
@@ -135,7 +139,7 @@ namespace JankyUI.Nodes
                                 resource = __defaultValue__;
                             }
                             //Else Resource is (probably) same type as target
-                            instance = Activator.CreateInstance(__wrapper__, resource);
+                            targetValue = Activator.CreateInstance(__wrapper__, resource);
                         }
                     }
                     else
@@ -143,7 +147,7 @@ namespace JankyUI.Nodes
                         // Direct Set
                         if (__dataType__ == typeof(string))
                         {
-                            instance = Activator.CreateInstance(__wrapper__, sourceValue);
+                            targetValue = Activator.CreateInstance(__wrapper__, sourceValue);
                         }
                         // Convert and Set
                         else
@@ -153,10 +157,10 @@ namespace JankyUI.Nodes
                                 Console.WriteLine("Can't convert String '{0}' to Target Type '{1}'", sourceValue, __dataType__);
                                 converted = __defaultValue__;
                             }
-                            instance = Activator.CreateInstance(__wrapper__, converted);
+                            targetValue = Activator.CreateInstance(__wrapper__, converted);
                         }
                     }
-                    setterDelegate(node, instance);
+                    setterDelegate(node, targetValue);
                 };
             }
             else if (propertyType.IsSubclassOfRawGeneric(typeof(JankyMethod<>)))
@@ -190,52 +194,82 @@ namespace JankyUI.Nodes
             }
             else
             {
+                var __dataType__ = propertyType;
+                var __converter__ = TypeDescriptor.GetConverter(__dataType__);
+                if (!prop.DefaultValue.TryConvertTo(__dataType__, out var __defaultValue__))
+                {
+                    Console.WriteLine("Invalid Default Value for Property {0} in {1}", prop.Name, NodeType);
+                }
+
                 var converter = TypeDescriptor.GetConverter(propertyType);
-                return (node, value) =>
+                return (node, sourceValue) =>
                 {
                     bool escapedSpecialName = false;
-                    if (value?.StartsWith("@@") == true || value?.StartsWith("##") == true)
+                    if (sourceValue?.StartsWith("@@") == true || sourceValue?.StartsWith("##") == true)
                     {
-                        value = value.Substring(1);
+                        sourceValue = sourceValue.Substring(1);
                         escapedSpecialName = true;
                     }
 
-                    object instance;
-                    if (value.IsNullOrWhiteSpace())
+                    object targetValue;
+                    // No Value Provided
+                    if (sourceValue.IsNullOrWhiteSpace())
                     {
-                        instance = (propertyType.IsValueType)
-                            ? Activator.CreateInstance(propertyType)
-                            : null;
+                        targetValue = __defaultValue__;
                     }
-                    else if (!escapedSpecialName && value.StartsWith("@"))
+                    else if (!escapedSpecialName && sourceValue.StartsWith("@"))
                     {
-                        throw new NotSupportedException("Normal Properties don't support Binding");
+                        Console.WriteLine("Normal Properties don't support Binding");
+                        targetValue = __defaultValue__;
                     }
-                    else if (!escapedSpecialName && value.StartsWith("#"))
+                    else if (!escapedSpecialName && sourceValue.StartsWith("#"))
                     {
-                        throw new NotImplementedException();
-                    }
-                    else
-                    {
-                        if (propertyType.IsArray)
+                        var resourceKey = sourceValue.Substring(1);
+
+                        // Key not Present
+                        if (!node.Context.Resources.TryGetValue(resourceKey, out var resource))
                         {
-                            var values = value.SplitEx('\\', ',');
-                            var elementType = propertyType.GetElementType();
-                            var elemConverter = TypeDescriptor.GetConverter(elementType);
-                            var array = (Array)Activator.CreateInstance(elementType.MakeArrayType(), values.Length);
-                            for (int i = 0; i < values.Length; i++)
-                            {
-                                var converted = elemConverter.ConvertFromInvariantString(values[i]);
-                                array.SetValue(converted, i);
-                            }
-                            instance = Activator.CreateInstance(propertyType, new[] { array });
+                            Console.WriteLine("Resource Key not Found: {0}", resourceKey);
+                            targetValue = __defaultValue__;
                         }
                         else
                         {
-                            instance = converter.ConvertFromInvariantString(value);
+                            // Resource is EXPLICITLY set to null
+                            if (resource == null && __dataType__.IsValueType)
+                            {
+                                resource = Activator.CreateInstance(__dataType__);
+                            }
+                            // Resource is string, but target type isnt, Try Converting
+                            else if (resource.GetType() == typeof(string)
+                                && __dataType__ != typeof(string)
+                                && !((string)resource).TryConvertTo(__dataType__, out resource))
+                            {
+                                Console.WriteLine("Can't convert Resource String {0} to Target Type {1}", resourceKey, __dataType__);
+                                resource = __defaultValue__;
+                            }
+                            //Else Resource is (probably) same type as target
+                            targetValue = resource;
                         }
                     }
-                    setterDelegate(node, instance);
+                    else
+                    {
+                        // Direct Set
+                        if (__dataType__ == typeof(string))
+                        {
+                            targetValue = sourceValue;
+                        }
+                        // Convert and Set
+                        else
+                        {
+                            if (!sourceValue.TryConvertTo(__dataType__, out var converted))
+                            {
+                                Console.WriteLine("Can't convert String '{0}' to Target Type '{1}'", sourceValue, __dataType__);
+                                converted = __defaultValue__;
+                            }
+                            targetValue = converted;
+                        }
+                    }
+                    setterDelegate(node, targetValue);
                 };
             }
         }

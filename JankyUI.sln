@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BepInEx", "..\BepInEx\BepIn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{98D476B7-4ECB-4EBC-B09F-0C13331655E4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JankyUI.Tests", "JankyUI.Tests\JankyUI.Tests.csproj", "{2E69BC5D-5FB3-43D1-8F8D-59790141FC89}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\BepInEx\BepInEx.Common\BepInEx.Common.projitems*{4ffba620-f5ed-47f9-b90c-dad1316fd9b9}*SharedItemsImports = 4
@@ -45,6 +47,12 @@ Global
 		{98D476B7-4ECB-4EBC-B09F-0C13331655E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D476B7-4ECB-4EBC-B09F-0C13331655E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98D476B7-4ECB-4EBC-B09F-0C13331655E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E69BC5D-5FB3-43D1-8F8D-59790141FC89}.Debug - Mock|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E69BC5D-5FB3-43D1-8F8D-59790141FC89}.Debug - Mock|Any CPU.Build.0 = Debug|Any CPU
+		{2E69BC5D-5FB3-43D1-8F8D-59790141FC89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E69BC5D-5FB3-43D1-8F8D-59790141FC89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E69BC5D-5FB3-43D1-8F8D-59790141FC89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E69BC5D-5FB3-43D1-8F8D-59790141FC89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
