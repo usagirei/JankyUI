@@ -10,8 +10,8 @@ namespace JankyUI.Nodes
     [JankyProperty("image", nameof(Image))]
     internal class LabelNode : LayoutNode
     {
-        public readonly JankyProperty<string> Text;
-        public readonly JankyProperty<Texture> Image;
+        public JankyProperty<string> Text;
+        public JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
 
@@ -43,8 +43,8 @@ namespace JankyUI.Nodes
     [JankyProperty("image", nameof(Image))]
     internal class BoxNode : LayoutNode
     {
-        public readonly JankyProperty<string> Text;
-        public readonly JankyProperty<Texture> Image;
+        public JankyProperty<string> Text;
+        public JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
 

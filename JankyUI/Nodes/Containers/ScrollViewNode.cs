@@ -10,8 +10,8 @@ namespace JankyUI.Nodes
     [JankyProperty("y-offset", nameof(ScrollY))]
     internal class ScrollViewNode : LayoutNode
     {
-        public readonly JankyProperty<float> ScrollX;
-        public readonly JankyProperty<float> ScrollY;
+        public JankyProperty<float> ScrollX;
+        public JankyProperty<float> ScrollY;
 
         private Vector2 ScrollPos
         {

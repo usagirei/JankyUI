@@ -22,7 +22,7 @@ namespace JankyUI.Nodes
     [JankyProperty("type", nameof(Type), DefaultValue = "horizontal")]
     internal class GroupNode : LayoutNode
     {
-        public readonly JankyProperty<GroupTypeEnum> Type;
+        public JankyProperty<GroupTypeEnum> Type;
 
         protected override void OnGUI()
         {

@@ -16,12 +16,12 @@ namespace JankyUI.Nodes
     [JankyProperty("on-change", nameof(OnChange))]
     internal class ScrollBarNode : LayoutNode
     {
-        public readonly JankyProperty<ScrollBarTypeEnum> Type;
-        public readonly JankyProperty<float> Value;
-        public readonly JankyProperty<float> Size;
-        public readonly JankyProperty<float> MinValue;
-        public readonly JankyProperty<float> MaxValue;
-        public readonly JankyMethod<Action<float>> OnChange;
+        public JankyProperty<ScrollBarTypeEnum> Type;
+        public JankyProperty<float> Value;
+        public JankyProperty<float> Size;
+        public JankyProperty<float> MinValue;
+        public JankyProperty<float> MaxValue;
+        public JankyMethod<Action<float>> OnChange;
 
         protected override void OnGUI()
         {

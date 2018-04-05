@@ -12,10 +12,10 @@ namespace JankyUI.Nodes
     [JankyProperty("repeat", nameof(IsRepeat))]
     internal class ButtonNode : LayoutNode
     {
-        public readonly JankyMethod<Action> OnClick;
-        public readonly JankyProperty<string> Text;
-        public readonly JankyProperty<bool> IsRepeat;
-        public readonly JankyProperty<Texture> Image;
+        public JankyMethod<Action> OnClick;
+        public JankyProperty<string> Text;
+        public JankyProperty<bool> IsRepeat;
+        public JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
 

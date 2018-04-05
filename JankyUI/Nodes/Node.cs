@@ -10,8 +10,8 @@ namespace JankyUI.Nodes
     [JankyProperty("style", nameof(Style))]
     internal class Node
     {
-        public readonly Binding.JankyProperty<GUIStyle> Style;
-        public readonly string DataContextName;
+        public Binding.JankyProperty<GUIStyle> Style;
+        public string DataContextName;
 
         public List<Node> Children { get; set; }
         public JankyNodeContext Context { get; set; }
@@ -20,7 +20,7 @@ namespace JankyUI.Nodes
         {
             get
             {
-                return ((IJankyContext)Context).Skin;
+                return Context.Skin;
             }
         }
 

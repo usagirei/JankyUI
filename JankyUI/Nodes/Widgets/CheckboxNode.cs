@@ -12,9 +12,9 @@ namespace JankyUI.Nodes
     [JankyProperty("on-change", nameof(OnChange))]
     internal class CheckboxNode : LayoutNode
     {
-        public readonly JankyProperty<bool> Checked;
-        public readonly JankyProperty<string> Text;
-        public readonly JankyMethod<Action<bool>> OnChange;
+        public JankyProperty<bool> Checked;
+        public JankyProperty<string> Text;
+        public JankyMethod<Action<bool>> OnChange;
 
         protected override void OnGUI()
         {

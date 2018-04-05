@@ -15,11 +15,11 @@ namespace JankyUI.Nodes
     [JankyProperty("on-change", nameof(OnChange))]
     internal class TextboxNode : LayoutNode
     {
-        public readonly JankyProperty<string> Text;
-        public readonly JankyProperty<TextBoxTypeEnum> Type;
-        public readonly JankyProperty<char> Mask;
-        public readonly JankyProperty<int> Length;
-        public readonly JankyMethod<Action<string>> OnChange;
+        public JankyProperty<string> Text;
+        public JankyProperty<TextBoxTypeEnum> Type;
+        public JankyProperty<char> Mask;
+        public JankyProperty<int> Length;
+        public JankyMethod<Action<string>> OnChange;
 
         protected override void OnGUI()
         {

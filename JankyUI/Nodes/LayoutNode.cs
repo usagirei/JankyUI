@@ -18,13 +18,13 @@ namespace JankyUI.Nodes
     internal abstract class LayoutNode : Node
     {
 
-        public readonly JankyProperty<float> Width;
-        public readonly JankyProperty<float> MinWidth;
-        public readonly JankyProperty<float> MaxWidth;
-        public readonly JankyProperty<float> Height;
-        public readonly JankyProperty<float> MinHeight;
-        public readonly JankyProperty<float> MaxHeight;
-        public readonly JankyProperty<ExpandModeEnum> ExpandMode;
+        public JankyProperty<float> Width;
+        public JankyProperty<float> MinWidth;
+        public JankyProperty<float> MaxWidth;
+        public JankyProperty<float> Height;
+        public JankyProperty<float> MinHeight;
+        public JankyProperty<float> MaxHeight;
+        public JankyProperty<ExpandModeEnum> ExpandMode;
 
         public GUILayoutOption[] GetLayoutOptions()
         {

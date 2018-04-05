@@ -11,9 +11,9 @@ namespace JankyUI.Nodes
     [JankyProperty("title", nameof(Title))]
     internal class WindowNode : AreaNode
     {
-        public readonly JankyProperty<string> Title;
-        public readonly JankyMethod<Action<int, bool>> MouseEnter;
-        public readonly JankyMethod<Action<int, bool>> MouseLeave;
+        public JankyProperty<string> Title;
+        public JankyMethod<Action<int, bool>> MouseEnter;
+        public JankyMethod<Action<int, bool>> MouseLeave;
 
         public int ID { get { return Context.WindowID; } }
 

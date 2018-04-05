@@ -12,10 +12,10 @@ namespace JankyUI.Nodes
     [JankyProperty("height", nameof(Height))]
     internal class AreaNode : Node
     {
-        public readonly JankyProperty<float> X;
-        public readonly JankyProperty<float> Y;
-        public readonly JankyProperty<float> Width;
-        public readonly JankyProperty<float> Height;
+        public JankyProperty<float> X;
+        public JankyProperty<float> Y;
+        public JankyProperty<float> Width;
+        public JankyProperty<float> Height;
 
         public Rect AreaRect
         {

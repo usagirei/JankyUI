@@ -13,10 +13,10 @@ namespace JankyUI.Nodes
     [JankyProperty("on-change", nameof(OnSelect))]
     internal class SelectNode : LayoutNode
     {
-        public readonly JankyProperty<string[]> Items;
-        public readonly JankyProperty<int> Columns;
-        public readonly JankyProperty<int> SelectedIndex;
-        public readonly JankyMethod<Action<int>> OnSelect;
+        public JankyProperty<string[]> Items;
+        public JankyProperty<int> Columns;
+        public JankyProperty<int> SelectedIndex;
+        public JankyMethod<Action<int>> OnSelect;
 
         protected override void OnGUI()
         {

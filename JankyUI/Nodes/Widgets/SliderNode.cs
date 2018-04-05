@@ -17,11 +17,11 @@ namespace JankyUI.Nodes
     {
 
 
-        public readonly JankyProperty<SliderTypeEnum> Type;
-        public readonly JankyProperty<float> Value;
-        public readonly JankyProperty<float> MinValue;
-        public readonly JankyProperty<float> MaxValue;
-        public readonly JankyMethod<Action<float>> OnChange;
+        public JankyProperty<SliderTypeEnum> Type;
+        public JankyProperty<float> Value;
+        public JankyProperty<float> MinValue;
+        public JankyProperty<float> MaxValue;
+        public JankyMethod<Action<float>> OnChange;
 
         protected override void OnGUI()
         {
