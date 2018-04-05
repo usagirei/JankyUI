@@ -65,7 +65,7 @@ namespace JankyUI.Binding
                 case DataOperationResultEnum.TargetNull:
                     return _defaultValue;
                 case DataOperationResultEnum.MissingAcessor:
-                    Console.WriteLine("Property has no Getter: {0}", DataContextMember);
+                    Console.WriteLine("[JankyProperty] Property has no (visible) getter: '{0}'", DataContextMember);
                     return _defaultValue;
                 default:
                     throw new ArgumentOutOfRangeException("Invalid Data Operation");
@@ -92,7 +92,7 @@ namespace JankyUI.Binding
                         _internalValue = value;
                         return;
                     case DataOperationResultEnum.MissingAcessor:
-                        Console.WriteLine("Property has no Setter: {0}", DataContextMember);
+                        Console.WriteLine("[JankyProperty] Property has no (visible) setter: '{0}'", DataContextMember);
                         _internalValue = value;
                         return;
                     default:

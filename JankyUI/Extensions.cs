@@ -122,7 +122,7 @@ namespace JankyUI
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("[JankConverter]" + ex.Message);
                 output = type.IsValueType ? Activator.CreateInstance(type) : null;
                 return false;
             }

@@ -54,11 +54,11 @@ namespace JankyUI.Binding
             {
                 var targetObj = TargetNode.DataContext;
                 var targetType = targetObj.GetType();
-                var targetMethod = targetType.GetMethod(MethodName);
+                var targetMethod = targetType.GetMethod(MethodName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
                 if (targetMethod == null)
                 {
-                    Console.WriteLine("Method '{0}' does not exist on '{1}'",
+                    Console.WriteLine("[JankyMethod] Method '{0}' does not exist on '{1}' or is not public",
                         MethodName,
                         targetType.FullName
                     );
@@ -67,9 +67,9 @@ namespace JankyUI.Binding
                 }
                 if (!targetMethod.IsCompatibleWithDelegate<TDelegate>())
                 {
-                    Console.WriteLine("Target Method '{0}' is not Compatible with '{1}'",
-                        targetType.FullName + "::" + targetMethod.Name,
-                        typeof(TDelegate).FullName + "::" + typeof(TDelegate).Name
+                    Console.WriteLine("[JankyMethod] Target Method '{0}' is not Compatible with '{1}'",
+                        targetType + "." + targetMethod.Name,
+                        typeof(TDelegate).ToString()
                     );
                     _delegate = Empty;
                     return;
