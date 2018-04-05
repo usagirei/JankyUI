@@ -11,6 +11,8 @@ namespace JankyUI.Binding
     {
         private T _defaultValue;
         private T _internalValue;
+        private bool _noTargetChangedFlag;
+
         public string DataContextMember { get; }
 
         public DataOperationResultEnum LastGetResult { get; private set; }
@@ -50,7 +52,11 @@ namespace JankyUI.Binding
         private T GetValue()
         {
             if (TargetNode == null || DataContextMember == null)
+            {
+                LastGetResult = _noTargetChangedFlag ? DataOperationResultEnum.Success : DataOperationResultEnum.Unchanged;
+                _noTargetChangedFlag = false;
                 return _internalValue;
+            }
 
             var stack = TargetNode.Context.DataContextStack;
             var op = stack.GetDataContextMember<T>(DataContextMember, out var value);
@@ -77,7 +83,16 @@ namespace JankyUI.Binding
         {
             if (TargetNode == null || DataContextMember == null)
             {
-                _internalValue = value;
+                if (Equals(_internalValue, value))
+                {
+                    LastSetResult = DataOperationResultEnum.Unchanged;
+                }
+                else
+                {
+                    _noTargetChangedFlag = true;
+                    _internalValue = value;
+                    LastSetResult = DataOperationResultEnum.Success;
+                }
                 return;
             }
 
@@ -98,7 +113,8 @@ namespace JankyUI.Binding
                     default:
                         throw new ArgumentOutOfRangeException("Invalid Data Operation");
                 }
-            }else
+            }
+            else
             {
                 LastSetResult = DataOperationResultEnum.Unchanged;
             }
