@@ -3,7 +3,7 @@
 namespace JankyUI.Enums
 {
     [Flags]
-    public enum ExpandModeEnum
+    public enum StretchModeEnum
     {
         None = 0,
         Width = 1,

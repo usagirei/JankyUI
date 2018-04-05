@@ -14,7 +14,7 @@ namespace JankyUI.Nodes
     [JankyProperty("height", nameof(Height), DefaultValue = "NaN")]
     [JankyProperty("min-height", nameof(MinHeight), DefaultValue = "NaN")]
     [JankyProperty("max-height", nameof(MaxHeight), DefaultValue = "NaN")]
-    [JankyProperty("expand", nameof(ExpandMode), DefaultValue = "width")]
+    [JankyProperty("stretch", nameof(StrechMode), DefaultValue = "width")]
     internal abstract class LayoutNode : Node
     {
 
@@ -24,7 +24,7 @@ namespace JankyUI.Nodes
         public JankyProperty<float> Height;
         public JankyProperty<float> MinHeight;
         public JankyProperty<float> MaxHeight;
-        public JankyProperty<ExpandModeEnum> ExpandMode;
+        public JankyProperty<StretchModeEnum> StrechMode;
 
         public GUILayoutOption[] GetLayoutOptions()
         {
@@ -44,9 +44,9 @@ namespace JankyUI.Nodes
                 if (!float.IsNaN(MaxHeight))
                     yield return GUILayout.Width(MaxHeight);
 
-                var flags = ExpandMode.Value;
-                yield return GUILayout.ExpandWidth((flags & ExpandModeEnum.Width) == ExpandModeEnum.Width);
-                yield return GUILayout.ExpandHeight((flags & ExpandModeEnum.Height) == ExpandModeEnum.Height);
+                var flags = StrechMode.Value;
+                yield return GUILayout.ExpandWidth((flags & StretchModeEnum.Width) == StretchModeEnum.Width);
+                yield return GUILayout.ExpandHeight((flags & StretchModeEnum.Height) == StretchModeEnum.Height);
             }
             return Enumerate().ToArray();
         }
