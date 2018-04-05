@@ -1,6 +1,7 @@
 ﻿using System;
 using JankyUI.Attributes;
 using JankyUI.Binding;
+using JankyUI.Enums;
 using UnityEngine;
 
 namespace JankyUI.Nodes
@@ -9,12 +10,12 @@ namespace JankyUI.Nodes
     [JankyProperty("text", nameof(Text))]
     [JankyProperty("image", nameof(Image))]
     [JankyProperty("on-click", nameof(OnClick))]
-    [JankyProperty("repeat", nameof(IsRepeat))]
+    [JankyProperty("type", nameof(Type))]
     internal class ButtonNode : LayoutNode
     {
         public JankyMethod<Action> OnClick;
         public JankyProperty<string> Text;
-        public JankyProperty<bool> IsRepeat;
+        public JankyProperty<ButtonTypeEnum> Type;
         public JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
@@ -37,7 +38,7 @@ namespace JankyUI.Nodes
             Console.WriteLine("Button: {0} {1}", Text, IsRepeat);
 #else
             UpdateContent();
-            if (IsRepeat?.Value ?? false)
+            if (Type.Value == ButtonTypeEnum.Repeat)
             {
                 if (GUILayout.RepeatButton(Content, GetLayoutOptions()))
                     OnClick.Invoke();

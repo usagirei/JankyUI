@@ -60,6 +60,7 @@
     <Compile Include="Binding\BindingUtils.cs" />
     <Compile Include="Binding\JankyMethod.cs" />
     <Compile Include="Binding\JankyProperty.cs" />
+    <Compile Include="Enums\ButtonTypeEnum.cs" />
     <Compile Include="IJankyContext.cs" />
     <Compile Include="JankyContext.cs" />
     <Compile Include="JankyDataContextStack.cs" />

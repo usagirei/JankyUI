@@ -88,56 +88,136 @@
 
   <!-- Common Attribute Types -->
 
-  <xs:simpleType name="Attr-Resource" >
-    <xs:union memberTypes="jank:Binding" />
-  </xs:simpleType>
-
-  <xs:simpleType name="Attr-Bindable" >
+  <xs:simpleType name="Attr-Method" >
+    <xs:annotation>
+      <xs:documentation>
+        A Referenced Method - Only Supports @Binding notation.
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="jank:Binding" />
   </xs:simpleType>
 
   <!-- Object -->
 
-  <xs:simpleType name="Attr-Resource-Bindable" >
-    <xs:union memberTypes="jank:Resource jank:Binding" />
-  </xs:simpleType>
-
-  <!-- Object -->
-
-  <xs:simpleType name="Attr-Texture-Resource-Bindable" >
+  <xs:simpleType name="Attr-Texture" >
+    <xs:annotation>
+      <xs:documentation>
+        A Texture Value - Supports #Resource and @Binding notations.
+        Textures, if specified inline or as as String Resource, but be in the following format:
+        res:///Embedded.Resource.Name;SourceAssemblyName
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="jank:ResourceURI jank:Resource jank:Binding" />
   </xs:simpleType>
 
   <!-- Char -->
 
-  <xs:simpleType name="Attr-Char-Resource-Bindable">
+  <xs:simpleType name="Attr-Char">
+    <xs:annotation>
+      <xs:documentation>
+        A Single Character Value - Supports #Resource and @Binding notations.
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="jank:Char jank:Resource jank:Binding" />
   </xs:simpleType>
 
   <!-- Text -->
 
-  <xs:simpleType name="Attr-String-Resource-Bindable">
+  <xs:simpleType name="Attr-String">
+    <xs:annotation>
+      <xs:documentation>
+        A String Value - Supports #Resource and @Binding notations.
+        If a string is to start with @ or # and is not a Resource or Binding, it has to be escaped with either ## or @@
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="jank:String jank:Resource jank:Binding" />
   </xs:simpleType>
 
   <!-- Integer -->
 
-  <xs:simpleType name="Attr-Integer-Resource-Bindable" >
+  <xs:simpleType name="Attr-Integer" >
+    <xs:annotation>
+      <xs:documentation>
+        A Integer Value - Supports #Resource and @Binding notations.
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="xs:integer jank:Resource jank:Binding" />
   </xs:simpleType>
 
   <!-- Decimal -->
 
-  <xs:simpleType name="Attr-Decimal-Resource-Bindable" >
+  <xs:simpleType name="Attr-Decimal" >
+    <xs:annotation>
+      <xs:documentation>
+        A Floating Point Value - Supports #Resource and @Binding notations.
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="xs:decimal jank:Resource jank:Binding" />
   </xs:simpleType>
 
   <!-- Boolean -->
 
-  <xs:simpleType name="Attr-Bool-Resource-Bindable" >
+  <xs:simpleType name="Attr-Bool" >
+    <xs:annotation>
+      <xs:documentation>
+        A Boolean Value - Supports #Resource and @Binding notations.
+      </xs:documentation>
+    </xs:annotation>
     <xs:union memberTypes="xs:boolean jank:Resource jank:Binding" />
   </xs:simpleType>
 
+  <!-- Enums -->
+  
+  <xs:simpleType name="Attr-EnumStretch">
+    <xs:annotation>
+      <xs:documentation>
+        An Enumeration Value - Supports #Resource and @Binding notations.
+        Supported Values: none, horizontal, vertical, both
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="jank:Enum-StretchType jank:Resource jank:Binding" />
+  </xs:simpleType>
+
+  <xs:simpleType name="Attr-EnumButton">
+    <xs:annotation>
+      <xs:documentation>
+        An Enumeration Value - Supports #Resource and @Binding notations.
+        Supported Values: normal, repeat
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="jank:Enum-ButtonType jank:Resource jank:Binding" />
+  </xs:simpleType>
+
+  <xs:simpleType name="Attr-EnumScroll">
+    <xs:annotation>
+      <xs:documentation>
+        An Enumeration Value - Supports #Resource and @Binding notations.
+        Supported Values: horizontal, vertical
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="jank:Enum-ScrollbarType jank:Resource jank:Binding" />
+  </xs:simpleType>
+
+  <xs:simpleType name="Attr-EnumText">
+    <xs:annotation>
+      <xs:documentation>
+        An Enumeration Value - Supports #Resource and @Binding notations.
+        Supported Values: simple, multiline, password
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="jank:Enum-TextboxType jank:Resource jank:Binding" />
+  </xs:simpleType>
+
+  <xs:simpleType name="Attr-EnumGroup">
+    <xs:annotation>
+      <xs:documentation>
+        An Enumeration Value - Supports #Resource and @Binding notations.
+        Supported Values: horizontal, vertical
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="jank:Enum-GroupType jank:Resource jank:Binding" />
+  </xs:simpleType>
+  
   <!-- Nodes -->
 
   <!-- Base Node Types -->
@@ -150,19 +230,15 @@
   <xs:complexType name="SimpleNodeWithLayoutOptions" abstract="true">
     <xs:complexContent>
       <xs:extension base="jank:SimpleNode">
-        <xs:attribute name="width" type="jank:Attr-Integer-Resource-Bindable" />
-        <xs:attribute name="min-width" type="jank:Attr-Integer-Resource-Bindable" />
-        <xs:attribute name="max-width" type="jank:Attr-Integer-Resource-Bindable" />
+        <xs:attribute name="width" type="jank:Attr-Integer" />
+        <xs:attribute name="min-width" type="jank:Attr-Integer" />
+        <xs:attribute name="max-width" type="jank:Attr-Integer" />
 
-        <xs:attribute name="height" type="jank:Attr-Integer-Resource-Bindable" />
-        <xs:attribute name="min-height" type="jank:Attr-Integer-Resource-Bindable" />
-        <xs:attribute name="max-height" type="jank:Attr-Integer-Resource-Bindable" />
+        <xs:attribute name="height" type="jank:Attr-Integer" />
+        <xs:attribute name="min-height" type="jank:Attr-Integer" />
+        <xs:attribute name="max-height" type="jank:Attr-Integer" />
 
-        <xs:attribute name="stretch">
-          <xs:simpleType>
-            <xs:union memberTypes="jank:Enum-StretchType jank:Resource jank:Binding" />
-          </xs:simpleType>
-        </xs:attribute>
+        <xs:attribute name="stretch" type="jank:Attr-EnumStretch" />
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -193,14 +269,10 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="text" type="jank:Attr-String-Resource-Bindable" />
-          <xs:attribute name="image" type="jank:Attr-Texture-Resource-Bindable" />
-          <xs:attribute name="on-click" type="jank:Attr-Bindable" use="required" />
-          <xs:attribute name="type" use="optional">
-            <xs:simpleType>
-              <xs:union memberTypes="jank:Enum-ButtonType jank:Attr-Resource-Bindable" />
-            </xs:simpleType>
-          </xs:attribute>
+          <xs:attribute name="text" type="jank:Attr-String" />
+          <xs:attribute name="image" type="jank:Attr-Texture" />
+          <xs:attribute name="on-click" type="jank:Attr-Method" use="required" />
+          <xs:attribute name="type" use="optional" type="jank:Attr-EnumButton" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -210,8 +282,8 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="text" type="jank:Attr-String-Resource-Bindable" />
-          <xs:attribute name="image" type="jank:Attr-Texture-Resource-Bindable" />
+          <xs:attribute name="text" type="jank:Attr-String" />
+          <xs:attribute name="image" type="jank:Attr-Texture" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -221,16 +293,12 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="size" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="value" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="min-value" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="max-value" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="on-change" type="jank:Attr-Resource-Bindable" />
-          <xs:attribute name="type">
-            <xs:simpleType>
-              <xs:union memberTypes="jank:Enum-ScrollbarType jank:Attr-Resource-Bindable" />
-            </xs:simpleType>
-          </xs:attribute>
+          <xs:attribute name="size" type="jank:Attr-Decimal" />
+          <xs:attribute name="value" type="jank:Attr-Decimal" />
+          <xs:attribute name="min-value" type="jank:Attr-Decimal" />
+          <xs:attribute name="max-value" type="jank:Attr-Decimal" />
+          <xs:attribute name="on-change" type="jank:Attr-Method" />
+          <xs:attribute name="type" type="jank:Attr-EnumScroll" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -240,10 +308,10 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="items" type="jank:Attr-String-Resource-Bindable" use="required" />
-          <xs:attribute name="columns" type="jank:Attr-Integer-Resource-Bindable" />
-          <xs:attribute name="selected-index" type="jank:Attr-Integer-Resource-Bindable" />
-          <xs:attribute name="on-change" type="jank:Attr-Bindable" />
+          <xs:attribute name="items" type="jank:Attr-String" use="required" />
+          <xs:attribute name="columns" type="jank:Attr-Integer" />
+          <xs:attribute name="selected-index" type="jank:Attr-Integer" />
+          <xs:attribute name="on-change" type="jank:Attr-Method" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -253,10 +321,10 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="items" type="jank:Attr-String-Resource-Bindable" use="required" />
-          <xs:attribute name="columns" type="jank:Attr-Integer-Resource-Bindable" />
-          <xs:attribute name="selected-index" type="jank:Attr-Integer-Resource-Bindable" />
-          <xs:attribute name="on-change" type="jank:Attr-Bindable" />
+          <xs:attribute name="items" type="jank:Attr-String" use="required" />
+          <xs:attribute name="columns" type="jank:Attr-Integer" />
+          <xs:attribute name="selected-index" type="jank:Attr-Integer" />
+          <xs:attribute name="on-change" type="jank:Attr-Method" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -266,7 +334,7 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="size" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="size" type="jank:Attr-Decimal" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -276,15 +344,11 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="text" type="jank:Attr-String-Resource-Bindable" use="required" />
-          <xs:attribute name="mask" type="jank:Attr-Char-Resource-Bindable" />
-          <xs:attribute name="max-lenght" type="jank:Attr-Integer-Resource-Bindable" />
-          <xs:attribute name="on-change" type="jank:Attr-Bindable" use="optional" />
-          <xs:attribute name="type">
-            <xs:simpleType>
-              <xs:union memberTypes="jank:Enum-TextboxType jank:Attr-Resource-Bindable" />
-            </xs:simpleType>
-          </xs:attribute>
+          <xs:attribute name="text" type="jank:Attr-String" use="required" />
+          <xs:attribute name="mask" type="jank:Attr-Char" />
+          <xs:attribute name="max-lenght" type="jank:Attr-Integer" />
+          <xs:attribute name="on-change" type="jank:Attr-Method" use="optional" />
+          <xs:attribute name="type" type="jank:Attr-EnumText" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -294,9 +358,9 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
-          <xs:attribute name="checked" type="jank:Attr-Bool-Resource-Bindable" />
-          <xs:attribute name="text" type="jank:Attr-String-Resource-Bindable" />
-          <xs:attribute name="on-change" type="jank:Attr-Bindable" use="optional" />
+          <xs:attribute name="checked" type="jank:Attr-Bool" />
+          <xs:attribute name="text" type="jank:Attr-String" />
+          <xs:attribute name="on-change" type="jank:Attr-Method" use="optional" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -308,8 +372,8 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:ComplexNodeWithLayoutOptions">
-          <xs:attribute name="x-offset" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="y-offset" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="x-offset" type="jank:Attr-Decimal" />
+          <xs:attribute name="y-offset" type="jank:Attr-Decimal" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -319,11 +383,7 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:ComplexNodeWithLayoutOptions">
-          <xs:attribute name="type" use="optional" >
-            <xs:simpleType>
-              <xs:union memberTypes="jank:Enum-GroupType jank:Attr-Resource-Bindable" />
-            </xs:simpleType>
-          </xs:attribute>
+          <xs:attribute name="type" use="optional" type="jank:Attr-EnumGroup" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -333,10 +393,10 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:ComplexNode">
-          <xs:attribute name="width" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="height" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="x" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="y" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="width" type="jank:Attr-Decimal" />
+          <xs:attribute name="height" type="jank:Attr-Decimal" />
+          <xs:attribute name="x" type="jank:Attr-Decimal" />
+          <xs:attribute name="y" type="jank:Attr-Decimal" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -346,14 +406,14 @@
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="jank:ComplexNode">
-          <xs:attribute name="title" type="jank:Attr-String-Resource-Bindable" />
-          <xs:attribute name="mouse-enter" type="jank:Attr-Bindable" />
-          <xs:attribute name="mouse-leave" type="jank:Attr-Bindable" />
+          <xs:attribute name="title" type="jank:Attr-String" />
+          <xs:attribute name="mouse-enter" type="jank:Attr-Method" />
+          <xs:attribute name="mouse-leave" type="jank:Attr-Method" />
 
-          <xs:attribute name="width" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="height" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="x" type="jank:Attr-Decimal-Resource-Bindable" />
-          <xs:attribute name="y" type="jank:Attr-Decimal-Resource-Bindable" />
+          <xs:attribute name="width" type="jank:Attr-Decimal" />
+          <xs:attribute name="height" type="jank:Attr-Decimal" />
+          <xs:attribute name="x" type="jank:Attr-Decimal" />
+          <xs:attribute name="y" type="jank:Attr-Decimal" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
