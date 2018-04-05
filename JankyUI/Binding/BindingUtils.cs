@@ -3,21 +3,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 
 namespace JankyUI.Binding
 {
-    internal static class BindingUtils
+    public static class BindingUtils
     {
-        private static Dictionary<Type, DynamicMethod> _emptyDelegates;
+        private static Dictionary<Type, MethodInfo> _emptyDelegates;
+        private static Dictionary<string, (MethodInfo, MethodInfo)> _fieldAcessors;
+        private static Dictionary<string, MethodInfo> _compatibleDelegates;
+
+        private static AssemblyBuilder _dynamicAssembly;
+        private static ModuleBuilder _dynamicModule;
 
         static BindingUtils()
         {
-            _emptyDelegates = new Dictionary<Type, DynamicMethod>();
+            _emptyDelegates = new Dictionary<Type, MethodInfo>();
+            _fieldAcessors = new Dictionary<string, (MethodInfo, MethodInfo)>();
+            _compatibleDelegates = new Dictionary<string, MethodInfo>();
+
+            _dynamicAssembly = AppDomain.CurrentDomain.DefineDynamicAssembly(
+                new AssemblyName("JankyUI.Dynamic"),
+                AssemblyBuilderAccess.RunAndSave
+            );
+            _dynamicModule = _dynamicAssembly.DefineDynamicModule("JankyUI.Dynamic", "JankyUI.Dynamic.dll");
+        }
+
+        public static void SaveDynamicModule()
+        {
+            _dynamicAssembly.Save("JankyUI.Dynamic.dll");
         }
 
         public static Delegate MakeEmptyDelegate(Type delegateType)
         {
-            if (!_emptyDelegates.TryGetValue(delegateType, out DynamicMethod dm))
+            if (!_emptyDelegates.TryGetValue(delegateType, out MethodInfo method))
             {
                 if (!delegateType.IsSubclassOf(typeof(Delegate)))
                     throw new ArgumentException("Generic Type is not a Delegate", nameof(delegateType));
@@ -26,19 +45,18 @@ namespace JankyUI.Binding
                 Type delegateReturn = delegateSignature.ReturnType;
                 Type[] delegateParams = delegateSignature.GetParameters().Select(x => x.ParameterType).ToArray();
 
-                var dynamicMethodName = 
-                    "<" + nameof(MakeEmptyDelegate) + ">_" 
-                    + delegateReturn.FullName + "_" 
-                    + delegateType.FullName 
-                    + "[" + string.Join(",", delegateParams.Select(x => x.FullName).ToArray()) + "]";
+                var cleanName = delegateType.ToString();
+                cleanName = cleanName.Replace('`', '#');
+                cleanName = cleanName.Replace(' ', '_');
+                cleanName = cleanName.Replace(".", "::");
+                var holderTypeName = $"{nameof(MakeEmptyDelegate)}.{cleanName}";
+                var holderType = _dynamicModule.DefineType(holderTypeName, TypeAttributes.Public);
 
-                _emptyDelegates[delegateType] = dm = new DynamicMethod(
-                    dynamicMethodName,
-                    delegateReturn,
-                    delegateParams,
-                    delegateType);
+                var dynamicMethodName = "Invoke";
 
-                var il = dm.GetILGenerator();
+                var methodBuilder = holderType.DefineMethod(dynamicMethodName, MethodAttributes.Public | MethodAttributes.Static, delegateReturn, delegateParams);
+
+                var il = methodBuilder.GetILGenerator();
                 if (delegateReturn != typeof(void))
                 {
                     var local = il.DeclareLocal(delegateReturn);
@@ -47,9 +65,13 @@ namespace JankyUI.Binding
                     il.Emit(OpCodes.Ldloc_S, local);
                 }
                 il.Emit(OpCodes.Ret);
+
+                holderType.CreateType();
+
+                _emptyDelegates[delegateType] = method = holderType.GetMethod("Invoke", BindingFlags.Static | BindingFlags.Public);
             }
 
-            return dm.CreateDelegate(delegateType);
+            return Delegate.CreateDelegate(delegateType, method);
         }
 
         public static TDelegate MakeEmptyDelegate<TDelegate>()
@@ -64,139 +86,152 @@ namespace JankyUI.Binding
         public static TCompatible MakeCompatibleDelegate<TCompatible>(MethodInfo method, Type dynamicMethodOwnerType = null)
             where TCompatible : class
         {
-            var maskSignature = typeof(TCompatible).GetMethod("Invoke");
+            var cleanName = (method.DeclaringType + "." + method.Name + "[" + typeof(TCompatible) + "]");
+            cleanName = cleanName.Replace('`', '#');
+            cleanName = cleanName.Replace(' ', '_');
+            cleanName = cleanName.Replace(".", "::");
+            var holderTypeName = $"{nameof(MakeCompatibleDelegate)}.{cleanName}";
 
-            var hasThis = (method.CallingConvention & CallingConventions.HasThis) == CallingConventions.HasThis;
-            var returnType = method.ReturnType;
-            Type[] paramTypes;
-            if (hasThis)
-                paramTypes = new[] { method.DeclaringType }.Concat(method.GetParameters().Select(x => x.ParameterType)).ToArray();
-            else
-                paramTypes = method.GetParameters().Select(x => x.ParameterType).ToArray();
-
-            var newRetType = maskSignature.ReturnType;
-            var newParamTypes = maskSignature.GetParameters().Select(x => x.ParameterType).ToArray();
-
-            if (paramTypes.Length != newParamTypes.Length)
-                throw new ArgumentException("Invalid argument count on delegates");
-
-            for (int i = 0; i < paramTypes.Length; i++)
+            if (!_compatibleDelegates.TryGetValue(holderTypeName, out var methodInfo))
             {
-                if (!newParamTypes[i].IsAssignableFrom(paramTypes[i]))
+                var maskSignature = typeof(TCompatible).GetMethod("Invoke");
+
+                var hasThis = (method.CallingConvention & CallingConventions.HasThis) == CallingConventions.HasThis;
+                var returnType = method.ReturnType;
+                Type[] paramTypes;
+                if (hasThis)
+                    paramTypes = new[] { method.DeclaringType }.Concat(method.GetParameters().Select(x => x.ParameterType)).ToArray();
+                else
+                    paramTypes = method.GetParameters().Select(x => x.ParameterType).ToArray();
+
+                var newRetType = maskSignature.ReturnType;
+                var newParamTypes = maskSignature.GetParameters().Select(x => x.ParameterType).ToArray();
+
+                if (paramTypes.Length != newParamTypes.Length)
+                    throw new ArgumentException("Invalid argument count on delegates");
+
+                for (int i = 0; i < paramTypes.Length; i++)
                 {
-                    throw new ArgumentException($"Argument {i} - '{paramTypes[i]}' can't be demoted to target type '{newParamTypes[i]}'");
+                    if (!newParamTypes[i].IsAssignableFrom(paramTypes[i]))
+                    {
+                        throw new ArgumentException($"Argument {i} - '{paramTypes[i]}' can't be demoted to target type '{newParamTypes[i]}'");
+                    }
                 }
-            }
 
-            if (!newRetType.IsAssignableFrom(returnType))
-                throw new ArgumentException($"Return Type '{returnType}' can't be demoted to target type '{newRetType}'");
+                if (!newRetType.IsAssignableFrom(returnType))
+                    throw new ArgumentException($"Return Type '{returnType}' can't be demoted to target type '{newRetType}'");
 
-            Type ownerType = (method is DynamicMethod) ? dynamicMethodOwnerType : method.DeclaringType;
+                var holderType = _dynamicModule.DefineType(holderTypeName, TypeAttributes.Public);
 
-            var dynamicMethodName =
-                "<" + nameof(MakeCompatibleDelegate) + ">_"
-                + returnType.FullName
-                + "_" + ownerType.FullName + "::"
-                + method.Name + "[" + string.Join(",", paramTypes.Select(t => t.FullName).ToArray()) + "]";
+                var dynamicMethodName = "Invoke";
 
-            var dyn = new DynamicMethod(dynamicMethodName, newRetType, newParamTypes, ownerType);
+                var methodBuilder = holderType.DefineMethod(dynamicMethodName, MethodAttributes.Public | MethodAttributes.Static, newRetType, newParamTypes);
 
-            var il = dyn.GetILGenerator();
-            for (int i = 0; i < paramTypes.Length; i++)
-            {
-                switch (i)
+                var il = methodBuilder.GetILGenerator();
+                for (int i = 0; i < paramTypes.Length; i++)
                 {
-                    case 0:
-                        il.Emit(OpCodes.Ldarg_0);
-                        break;
+                    switch (i)
+                    {
+                        case 0:
+                            il.Emit(OpCodes.Ldarg_0);
+                            break;
 
-                    case 1:
-                        il.Emit(OpCodes.Ldarg_1);
-                        break;
+                        case 1:
+                            il.Emit(OpCodes.Ldarg_1);
+                            break;
 
-                    case 2:
-                        il.Emit(OpCodes.Ldarg_2);
-                        break;
+                        case 2:
+                            il.Emit(OpCodes.Ldarg_2);
+                            break;
 
-                    case 3:
-                        il.Emit(OpCodes.Ldarg_3);
-                        break;
+                        case 3:
+                            il.Emit(OpCodes.Ldarg_3);
+                            break;
 
-                    case int _ when (i <= 255):
-                        il.Emit(OpCodes.Ldarg_S, (byte)i);
-                        break;
+                        case int _ when (i <= 255):
+                            il.Emit(OpCodes.Ldarg_S, (byte)i);
+                            break;
 
-                    default:
-                        il.Emit(OpCodes.Ldarg, i);
-                        break;
+                        default:
+                            il.Emit(OpCodes.Ldarg, i);
+                            break;
+                    }
+                    if (paramTypes[i] != newParamTypes[i])
+                        il.Emit(OpCodes.Unbox_Any, paramTypes[i]);
                 }
-                if (paramTypes[i] != newParamTypes[i])
-                    il.Emit(OpCodes.Unbox_Any, paramTypes[i]);
+
+                if (!method.IsVirtual)
+                    il.Emit(OpCodes.Call, method);
+                else
+                    il.Emit(OpCodes.Callvirt, method);
+
+
+                if (returnType != typeof(void))
+                {
+                    if (returnType.IsValueType)
+                        il.Emit(OpCodes.Box, returnType);
+                    if (returnType != newRetType && !newRetType.IsValueType)
+                        il.Emit(OpCodes.Castclass, newRetType);
+                }
+                il.Emit(OpCodes.Ret);
+
+                holderType.CreateType();
+
+                methodInfo = holderType.GetMethod("Invoke", BindingFlags.Static | BindingFlags.Public);
+
+                _compatibleDelegates[holderTypeName] = methodInfo;
             }
 
-            if (method.IsFinal || method is DynamicMethod)
-                il.Emit(OpCodes.Call, method);
-            else
-                il.Emit(OpCodes.Callvirt, method);
-                
-
-            if (returnType != typeof(void))
-            {
-                if (returnType.IsValueType)
-                    il.Emit(OpCodes.Box, returnType);
-                if (returnType != newRetType && !newRetType.IsValueType)
-                    il.Emit(OpCodes.Castclass, newRetType);
-            }
-            il.Emit(OpCodes.Ret);
-
-            return dyn.CreateDelegate(typeof(TCompatible)) as TCompatible;
+            return Delegate.CreateDelegate(typeof(TCompatible), methodInfo) as TCompatible;
         }
 
-        public static DynamicMethod MakeFieldSetter(FieldInfo field)
+        public static void MakeFieldGetterSetter(FieldInfo field, out MethodInfo getter, out MethodInfo setter)
         {
-            var dynamicMethodName =
-                "<" + nameof(MakeFieldSetter) + ">_"
-                + field.FieldType.FullName + "_"
-                + field.DeclaringType.FullName + "::" + field.Name;
+            var cleanName = (field.DeclaringType + "::" + field.Name);
+            cleanName = cleanName.Replace('`', '#');
+            cleanName = cleanName.Replace(' ', '_');
+            cleanName = cleanName.Replace(".", "::");
+            var holderTypeName = $"{nameof(MakeFieldAcessors)}.{cleanName}";
 
-            var dm = new DynamicMethod(
-                dynamicMethodName,
-                typeof(void),
-                new[] { field.DeclaringType, field.FieldType },
-                field.DeclaringType);
+            if (!_fieldAcessors.TryGetValue(holderTypeName, out var acessors))
+            {
+                var holderType = _dynamicModule.DefineType(holderTypeName, TypeAttributes.Public);
 
-            var gen = dm.GetILGenerator();
-            gen.Emit(OpCodes.Ldarg_0);
-            gen.Emit(OpCodes.Ldarg_1);
-            gen.Emit(OpCodes.Stfld, field);
-            gen.Emit(OpCodes.Ret);
-            return dm;
-        }
+                var attr = MethodAttributes.Static | MethodAttributes.Public;
 
-        public static DynamicMethod MakeFieldGetter(FieldInfo field)
-        {
-            var dynamicMethodName =
-                "<" + nameof(MakeFieldGetter) + ">_"
-                + field.FieldType.FullName + "_"
-                + field.DeclaringType.FullName + "::" + field.Name;
+                var getMethod = holderType.DefineMethod("Get", attr, field.FieldType, new[] { field.DeclaringType });
+                var getIL = getMethod.GetILGenerator();
+                getIL.Emit(OpCodes.Ldarg_0);
+                getIL.Emit(OpCodes.Ldfld, field);
+                getIL.Emit(OpCodes.Ret);
 
-            var dm = new DynamicMethod(
-                dynamicMethodName,
-                field.FieldType,
-                new[] { field.DeclaringType },
-                field.DeclaringType);
-            var gen = dm.GetILGenerator();
-            gen.Emit(OpCodes.Ldarg_0);
-            gen.Emit(OpCodes.Ldfld, field);
-            gen.Emit(OpCodes.Ret);
+                var setMethod = holderType.DefineMethod("Set", attr, typeof(void), new[] { field.DeclaringType, field.FieldType });
+                var setIL = setMethod.GetILGenerator();
+                setIL.Emit(OpCodes.Ldarg_0);
+                setIL.Emit(OpCodes.Ldarg_1);
+                setIL.Emit(OpCodes.Stfld, field);
+                setIL.Emit(OpCodes.Ret);
 
-            return dm;
+                holderType.CreateType();
+
+                var flags = BindingFlags.Static | BindingFlags.Public;
+                getter = holderType.GetMethod("Get", flags);
+                setter = holderType.GetMethod("Set", flags);
+
+                _fieldAcessors[holderTypeName] = acessors = (getter, setter);
+                return;
+            }
+
+            getter = acessors.Item1;
+            setter = acessors.Item2;
         }
 
         public static void MakeFieldAcessors<TField>(FieldInfo field, out Func<object, TField> getter, out Action<object, TField> setter)
         {
-            getter = MakeCompatibleDelegate<Func<object, TField>>(MakeFieldGetter(field), field.DeclaringType);
-            setter = MakeCompatibleDelegate<Action<object, TField>>(MakeFieldSetter(field), field.DeclaringType);
+            MakeFieldGetterSetter(field, out var get, out var set);
+
+            getter = MakeCompatibleDelegate<Func<object, TField>>(get);
+            setter = MakeCompatibleDelegate<Action<object, TField>>(set);
         }
 
         public static void MakePropertyAcessors<TProp>(PropertyInfo prop, out Func<object, TProp> getter, out Action<object, TProp> setter)

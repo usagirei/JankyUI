@@ -69,7 +69,7 @@ namespace JankyUI.Nodes
                     break;
 
                 case FieldInfo field_info:
-                    setterMethod = BindingUtils.MakeFieldSetter(field_info);
+                    BindingUtils.MakeFieldGetterSetter(field_info, out _, out setterMethod);
                     break;
 
                 default:

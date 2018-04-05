@@ -37,3 +37,4 @@ using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("Sandbox")]
 [assembly: InternalsVisibleTo("JankyUI.Tests")]
+[assembly: InternalsVisibleTo("JankyUI.Dynamic")]
