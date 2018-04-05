@@ -31,61 +31,14 @@ namespace JankyUI
                 LoadJankyNodes(ass);
         }
 
-        static int FindElementIndex(XmlElement element)
-        {
-            XmlNode parentNode = element.ParentNode;
-            if (parentNode is XmlDocument)
-            {
-                return 1;
-            }
-            XmlElement parent = (XmlElement)parentNode;
-            int index = 1;
-            foreach (XmlNode candidate in parent.ChildNodes)
-            {
-                if (candidate is XmlElement && candidate.Name == element.Name)
-                {
-                    if (candidate == element)
-                    {
-                        return index;
-                    }
-                    index++;
-                }
-            }
-            throw new ArgumentException("Couldn't find element within parent");
-        }
-
-        static string FindXPath(XmlNode node)
-        {
-            StringBuilder builder = new StringBuilder();
-            while (node != null)
-            {
-                switch (node.NodeType)
-                {
-                    case XmlNodeType.Attribute:
-                        builder.Insert(0, "/@" + node.Name);
-                        node = ((XmlAttribute)node).OwnerElement;
-                        break;
-                    case XmlNodeType.Element:
-                        int index = FindElementIndex((XmlElement)node);
-                        builder.Insert(0, "/" + node.Name + "[" + index + "]");
-                        node = node.ParentNode;
-                        break;
-                    case XmlNodeType.Document:
-                        return builder.ToString();
-                    default:
-                        throw new ArgumentException("Only elements and attributes are supported");
-                }
-            }
-            throw new ArgumentException("Node was not in a document");
-        }
-
-        private JankyNodeContext ResolveContext(XmlDocument xmlDoc, object dc = null)
+        private JankyNodeContext ResolveContext(XmlDocument xmlDoc, object dc, IDictionary<string, object> resources)
         {
             var ctx = new JankyNodeContext(dc);
             ctx.RootNode = NodeHelper<Node>.Instance.Activate(ctx);
             var settings = xmlDoc.SelectSingleNode("/*[local-name() = 'JankyUI']/*[local-name() = 'Resources']");
             if (settings != null)
             {
+                // TODO: Array-Notation
                 foreach (XmlNode setting in settings.ChildNodes)
                 {
                     var key = setting.Attributes["key"].Value;
@@ -118,7 +71,7 @@ namespace JankyUI
         }
 
 
-        public IJankyContext CreateJankyUI(string xml, object viewModel)
+        public IJankyContext CreateJankyUI(string xml, object viewModel, IDictionary<string, object> resources)
         {
             using (var xmlStream = new MemoryStream())
             using (var sw = new StreamWriter(xmlStream))
@@ -126,18 +79,18 @@ namespace JankyUI
                 sw.Write(xml);
                 sw.Flush();
                 xmlStream.Position = 0;
-                return CreateJankyUI(xmlStream, viewModel);
+                return CreateJankyUI(xmlStream, viewModel, resources);
             }
         }
 
-        public IJankyContext CreateJankyUI(Stream xmlStream, object viewModel)
+        public IJankyContext CreateJankyUI(Stream xmlStream, object viewModel, IDictionary<string, object> resources)
         {
             using (var xmlReader = XmlReader.Create(xmlStream))
             {
                 var doc = new XmlDocument();
                 doc.Load(xmlReader);
 
-                return ResolveContext(doc, viewModel);
+                return ResolveContext(doc, viewModel, resources);
             }
 
         }
