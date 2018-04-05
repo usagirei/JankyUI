@@ -31,7 +31,7 @@ namespace JankyUI
             var typeKey = (curType, memberName);
             if (!_acessorCache.TryGetValue(typeKey, out var getSetPair))
             {
-                Console.WriteLine("Creating new Getter for {0}.{1}", curType, memberName);
+                Console.WriteLine("[JankyStack] Creating new getter for '{0}.{1}'", curType, memberName);
                 const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
                 var targetMember = curType.GetMember(memberName, flags).FirstOrDefault();
                 switch (targetMember)
@@ -48,19 +48,20 @@ namespace JankyUI
                         break;
                     case null:
                         {
-                            Console.WriteLine($"Target Type has no public member named '{memberName}'");
+                            Console.WriteLine($"[JankyStack] Target Type has no public member named '{memberName}'");
                             get = null;
                             set = null;
                         }
                         break;
                     default:
                         {
-                            Console.WriteLine("Unsupported Member Type: {0}", memberName);
+                            Console.WriteLine("[JankyStack] Unsupported Member Type: '{0}'", memberName);
                             get = null;
                             set = null;
                         }
                         break;
                 }
+
                 _acessorCache[typeKey] = getSetPair = (get, set);
             }
             get = getSetPair.Item1;
@@ -94,7 +95,8 @@ namespace JankyUI
             if (curCtx == null)
                 return DataOperationResultEnum.TargetNull;
 
-            GetAcessorFor(curCtx.GetType(), memberName, out var getter, out _);
+            var type = curCtx.GetType();
+            GetAcessorFor(type, memberName, out var getter, out _);
             if (getter == null)
                 return DataOperationResultEnum.MissingAcessor;
 
@@ -123,17 +125,31 @@ namespace JankyUI
                 var curType = curCtx.GetType();
                 GetAcessorFor(curType, propertyName, out var getter, out _);
                 if (getter == null)
-                    throw new Exception("Property Can't be Read");
-                Stack.Push(getter(curCtx));
+                {
+                    Console.WriteLine("[JankyStack] Property has no (visible) getter: '{0}.{1}'", curType, propertyName);
+                    Stack.Push(null);
+                }
+                else
+                {
+                    var next = getter(curCtx);
+                    if(next != null && !next.GetType().IsVisible)
+                    {
+                        Console.WriteLine("[JankyStack] Property '{0}' is of Type '{1}', and the type is not public.", propertyName, next.GetType());
+                        next = null;
+                    }
+                    Stack.Push(next);
+                }
             }
         }
+
         public DataOperationResultEnum SetDataContextMember<T>(string memberName, T value)
         {
             var curCtx = Stack.Peek();
             if (curCtx == null)
                 return DataOperationResultEnum.TargetNull;
 
-            GetAcessorFor(curCtx.GetType(), memberName, out _, out var setter);
+            var type = curCtx.GetType();
+            GetAcessorFor(type, memberName, out _, out var setter);
             if (setter == null)
                 return DataOperationResultEnum.MissingAcessor;
 

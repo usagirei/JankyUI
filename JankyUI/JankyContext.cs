@@ -21,6 +21,11 @@ namespace JankyUI
 
         public JankyNodeContext(object dataContext)
         {
+            if(dataContext != null && !dataContext.GetType().IsVisible)
+            {
+                Console.WriteLine("[JankyContext] DataContext must be a public type.");
+                dataContext = null;
+            }
             DataContext = dataContext;
             DataContextStack = new JankyDataContextStack(this);
             Resources = new Dictionary<string, object>();
