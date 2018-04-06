@@ -65,9 +65,12 @@
     <Compile Include="JankyContext.cs" />
     <Compile Include="JankyDataContextStack.cs" />
     <Compile Include="JankyUIGenerator.cs" />
+    <Compile Include="JankyUIManager.cs" />
     <Compile Include="Nodes\Containers\AreaNode.cs" />
     <Compile Include="Enums\GroupTypeEnum.cs" />
     <Compile Include="Enums\ExpandModeEnum.cs" />
+    <Compile Include="EventArgs\JankyEventArgs.cs" />
+    <Compile Include="EventArgs\JankyEventArgs`1.cs" />
     <Compile Include="Nodes\Widgets\LabelNode.cs" />
     <Compile Include="Nodes\Containers\ScrollViewNode.cs" />
     <Compile Include="Nodes\Containers\GroupNode.cs" />
@@ -97,5 +100,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

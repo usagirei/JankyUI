@@ -12,5 +12,7 @@ namespace JankyUI
         int WindowID { get; }
 
         void OnGUI();
+
+        bool Active { get; set; }
     }
 }

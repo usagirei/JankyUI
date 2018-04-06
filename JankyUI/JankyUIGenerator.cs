@@ -11,6 +11,7 @@ using JankyUI.Nodes;
 
 namespace JankyUI
 {
+
     public class JankyUIGenerator
     {
         private static JankyUIGenerator _default;
@@ -34,6 +35,7 @@ namespace JankyUI
         private JankyNodeContext ResolveContext(XmlDocument xmlDoc, object dc, IDictionary<string, object> resources)
         {
             var ctx = new JankyNodeContext(dc);
+            JankyUIManager.Register(ctx);
             ctx.RootNode = NodeHelper<Node>.Instance.Activate(ctx);
             var settings = xmlDoc.SelectSingleNode("/*[local-name() = 'JankyUI']/*[local-name() = 'Resources']");
             if (settings != null)

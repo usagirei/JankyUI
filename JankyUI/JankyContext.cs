@@ -1,27 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using JankyUI.Binding;
 using JankyUI.Nodes;
 using UnityEngine;
 
 namespace JankyUI
 {
-    internal partial class JankyNodeContext : IJankyContext
+    internal class JankyNodeContext : IJankyContext
     {
-        public object DataContext { get; set; }
-        public GUISkin Skin { get; set; }
-        public Dictionary<string,object> Resources { get; }
-
-        public int WindowID { get; set; }
         internal Node RootNode { get; set; }
-
+        public bool Active { get; set; }
+        public object DataContext { get; set; }
         public JankyDataContextStack DataContextStack { get; }
-
+        public Dictionary<string, object> Resources { get; }
+        public GUISkin Skin { get; set; }
+        public int WindowID { get; set; }
         public JankyNodeContext(object dataContext)
         {
-            if(dataContext != null && !dataContext.GetType().IsVisible)
+            if (dataContext != null && !dataContext.GetType().IsVisible)
             {
                 Console.WriteLine("[JankyContext] DataContext must be a public type.");
                 dataContext = null;
@@ -33,6 +28,9 @@ namespace JankyUI
 
         public void OnGUI()
         {
+            if (!Active)
+                return;
+
             DataContextStack.Begin();
 
             RootNode.Execute();

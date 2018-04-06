@@ -225,6 +225,7 @@
 
   <xs:complexType name="SimpleNode" abstract="true">
     <xs:attribute name="data-context" type="jank:Identifier" />
+    <xs:attribute name="name" type="jank:Identifier" use="optional" />
   </xs:complexType>
 
   <xs:complexType name="SimpleNodeWithLayoutOptions" abstract="true">
