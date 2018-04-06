@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,7 +26,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>GIT;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -131,8 +131,16 @@
   </Target>
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release' ">
     <Delete Files="Properties\GitVersion.cs" />
+    <ItemGroup>
+      <ReleaseFiles Include="$(OutDir)\*" />
+      <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
+    </ItemGroup>
+    <GitVersion Short="True">
+      <Output TaskParameter="CommitHash" PropertyName="ShortCommitHash" />
+    </GitVersion>
+    <Zip Files="@(ReleaseFiles)" WorkingDirectory="$(OutDir)" ZipFileName="$(SolutionDir)Releases\$(TargetName)-$(VersionTag).$(Revision)-$(ShortCommitHash).zip" />
   </Target>
-  <PropertyGroup >
+  <PropertyGroup>
     <PostBuildEvent>copy $(TargetPath) K:\BepinEx\</PostBuildEvent>
   </PropertyGroup>
 </Project>
