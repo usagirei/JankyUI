@@ -33,7 +33,7 @@ Without worrying about UI Callbacks/Code,
         </Group>
       </Group>
       <Label text='A Big Text Area:' stretch='horizontal' />
-      <Textbox type='multiline' stretch='both' text='@ApiToken' />
+      <Textbox type='multiline' stretch='both' text='@BigBoundText' />
       <Group type='horizontal' stretch='horizontal' >
         <Space />
         <Button name='Button1' text='A Button' on-click='@Click' />
