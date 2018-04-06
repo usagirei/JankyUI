@@ -76,7 +76,7 @@ namespace JankyUI.Nodes
                     throw new Exception("Member is not Supported");
             }
 
-            var setterDelegate = BindingUtils.MakeCompatibleDelegate<Action<Node, object>>(setterMethod, NodeType);
+            var setterDelegate = BindingUtils.MakeCompatibleDelegate<Action<Node, object>>(setterMethod);
             var propertyType = setterMethod.GetParameters().Last().ParameterType;
 
             if (propertyType.IsSubclassOfRawGeneric(typeof(JankyProperty<>)))

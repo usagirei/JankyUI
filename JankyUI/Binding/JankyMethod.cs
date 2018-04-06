@@ -55,7 +55,9 @@ namespace JankyUI.Binding
             {
                 var targetObj = TargetNode.DataContext;
                 var targetType = targetObj.GetType();
-                var targetMethod = targetType.GetMethod(MethodName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                var targetMethod = targetType.GetMethod(MethodName,
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static
+                );
 
                 if (targetMethod == null)
                 {
@@ -66,7 +68,15 @@ namespace JankyUI.Binding
                     _delegate = Empty;
                     return;
                 }
-                if (!targetMethod.IsCompatibleWithDelegate<TDelegate>())
+
+
+                try
+                {
+                    _delegate = (targetMethod.IsStatic)
+                        ? BindingUtils.MakeCompatibleDelegate<TDelegate>(targetMethod)
+                        : BindingUtils.MakeCompatibleDelegate<TDelegate>(targetMethod, targetObj);
+                }
+                catch
                 {
                     Console.WriteLine("[JankyMethod] Target Method '{0}' is not Compatible with '{1}'",
                         targetType + "." + targetMethod.Name,
@@ -75,8 +85,6 @@ namespace JankyUI.Binding
                     _delegate = Empty;
                     return;
                 }
-
-                _delegate = Delegate.CreateDelegate(typeof(TDelegate), targetObj, targetMethod) as TDelegate;
             }
         }
 

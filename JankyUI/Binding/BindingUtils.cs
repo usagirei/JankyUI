@@ -83,13 +83,19 @@ namespace JankyUI.Binding
             return MakeEmptyDelegate(typeof(TDelegate)) as TDelegate;
         }
 
-        public static TCompatible MakeCompatibleDelegate<TCompatible>(MethodInfo method, Type dynamicMethodOwnerType = null)
+        public static TCompatible MakeCompatibleDelegate<TCompatible>(MethodInfo method, object target = null)
             where TCompatible : class
         {
+            bool hasTarget = target != null;
+
             var cleanName = (method.DeclaringType + "." + method.Name + "[" + typeof(TCompatible) + "]");
             cleanName = cleanName.Replace('`', '#');
             cleanName = cleanName.Replace(' ', '_');
             cleanName = cleanName.Replace(".", "::");
+
+            if (hasTarget)
+                cleanName += "_[" + target.GetType() + "]";
+
             var holderTypeName = $"{nameof(MakeCompatibleDelegate)}.{cleanName}";
 
             if (!_compatibleDelegates.TryGetValue(holderTypeName, out var methodInfo))
@@ -97,22 +103,26 @@ namespace JankyUI.Binding
                 var maskSignature = typeof(TCompatible).GetMethod("Invoke");
 
                 var hasThis = (method.CallingConvention & CallingConventions.HasThis) == CallingConventions.HasThis;
-                var returnType = method.ReturnType;
-                Type[] paramTypes;
-                if (hasThis)
-                    paramTypes = new[] { method.DeclaringType }.Concat(method.GetParameters().Select(x => x.ParameterType)).ToArray();
-                else
-                    paramTypes = method.GetParameters().Select(x => x.ParameterType).ToArray();
 
+                var returnType = method.ReturnType;
                 var newRetType = maskSignature.ReturnType;
-                var newParamTypes = maskSignature.GetParameters().Select(x => x.ParameterType).ToArray();
+
+                Type[] paramTypes = (hasThis)
+                    ? new[] { method.DeclaringType }.Concat(method.GetParameters().Select(x => x.ParameterType)).ToArray()
+                    : method.GetParameters().Select(x => x.ParameterType).ToArray();
+
+                Type[] newParamTypes = (hasTarget)
+                    ? new[] { target.GetType() }.Concat(maskSignature.GetParameters().Select(x => x.ParameterType)).ToArray()
+                    : maskSignature.GetParameters().Select(x => x.ParameterType).ToArray();
 
                 if (paramTypes.Length != newParamTypes.Length)
                     throw new ArgumentException("Invalid argument count on delegates");
 
                 for (int i = 0; i < paramTypes.Length; i++)
                 {
-                    if (!newParamTypes[i].IsAssignableFrom(paramTypes[i]))
+                    bool isAssignable = newParamTypes[i].IsAssignableFrom(paramTypes[i]);
+                    //isAssignable |= paramTypes[i].IsSubclassOfRawGeneric(newParamTypes[i]);
+                    if (!isAssignable)
                     {
                         throw new ArgumentException($"Argument {i} - '{paramTypes[i]}' can't be demoted to target type '{newParamTypes[i]}'");
                     }
@@ -182,8 +192,12 @@ namespace JankyUI.Binding
                 _compatibleDelegates[holderTypeName] = methodInfo;
             }
 
-            return Delegate.CreateDelegate(typeof(TCompatible), methodInfo) as TCompatible;
+            if (hasTarget)
+                return Delegate.CreateDelegate(typeof(TCompatible), target, methodInfo) as TCompatible;
+            else
+                return Delegate.CreateDelegate(typeof(TCompatible), methodInfo) as TCompatible;
         }
+
 
         public static void MakeFieldGetterSetter(FieldInfo field, out MethodInfo getter, out MethodInfo setter)
         {
@@ -199,18 +213,34 @@ namespace JankyUI.Binding
 
                 var attr = MethodAttributes.Static | MethodAttributes.Public;
 
-                var getMethod = holderType.DefineMethod("Get", attr, field.FieldType, new[] { field.DeclaringType });
-                var getIL = getMethod.GetILGenerator();
-                getIL.Emit(OpCodes.Ldarg_0);
-                getIL.Emit(OpCodes.Ldfld, field);
-                getIL.Emit(OpCodes.Ret);
+                if (field.IsStatic)
+                {
+                    var getMethod = holderType.DefineMethod("Get", attr, field.FieldType, Type.EmptyTypes);
+                    var getIL = getMethod.GetILGenerator();
+                    getIL.Emit(OpCodes.Ldsfld, field);
+                    getIL.Emit(OpCodes.Ret);
 
-                var setMethod = holderType.DefineMethod("Set", attr, typeof(void), new[] { field.DeclaringType, field.FieldType });
-                var setIL = setMethod.GetILGenerator();
-                setIL.Emit(OpCodes.Ldarg_0);
-                setIL.Emit(OpCodes.Ldarg_1);
-                setIL.Emit(OpCodes.Stfld, field);
-                setIL.Emit(OpCodes.Ret);
+                    var setMethod = holderType.DefineMethod("Set", attr, typeof(void), new[] { field.FieldType });
+                    var setIL = setMethod.GetILGenerator();
+                    setIL.Emit(OpCodes.Ldarg_1);
+                    setIL.Emit(OpCodes.Stsfld, field);
+                    setIL.Emit(OpCodes.Ret);
+                }
+                else
+                {
+                    var getMethod = holderType.DefineMethod("Get", attr, field.FieldType, new[] { field.DeclaringType });
+                    var getIL = getMethod.GetILGenerator();
+                    getIL.Emit(OpCodes.Ldarg_0);
+                    getIL.Emit(OpCodes.Ldfld, field);
+                    getIL.Emit(OpCodes.Ret);
+
+                    var setMethod = holderType.DefineMethod("Set", attr, typeof(void), new[] { field.DeclaringType, field.FieldType });
+                    var setIL = setMethod.GetILGenerator();
+                    setIL.Emit(OpCodes.Ldarg_0);
+                    setIL.Emit(OpCodes.Ldarg_1);
+                    setIL.Emit(OpCodes.Stfld, field);
+                    setIL.Emit(OpCodes.Ret);
+                }
 
                 holderType.CreateType();
 
@@ -230,18 +260,58 @@ namespace JankyUI.Binding
         {
             MakeFieldGetterSetter(field, out var get, out var set);
 
-            getter = MakeCompatibleDelegate<Func<object, TField>>(get);
-            setter = MakeCompatibleDelegate<Action<object, TField>>(set);
+            if (field.IsStatic)
+            {
+                var static_getter = MakeCompatibleDelegate<Func<TField>>(get);
+                var static_setter = MakeCompatibleDelegate<Action<TField>>(set);
+
+                getter = (nil) => static_getter();
+                setter = (nil, value) => static_setter(value);
+            }
+            else
+            {
+                getter = MakeCompatibleDelegate<Func<object, TField>>(get);
+                setter = MakeCompatibleDelegate<Action<object, TField>>(set);
+            }
         }
 
         public static void MakePropertyAcessors<TProp>(PropertyInfo prop, out Func<object, TProp> getter, out Action<object, TProp> setter)
         {
-            getter = (prop.CanRead)
-                ? MakeCompatibleDelegate<Func<object, TProp>>(prop.GetGetMethod())
-                : null;
-            setter = (prop.CanWrite)
-                ? MakeCompatibleDelegate<Action<object, TProp>>(prop.GetSetMethod())
-                : null;
+            if (prop.CanRead)
+            {
+                var get_method = prop.GetGetMethod();
+                if (get_method.IsStatic)
+                {
+                    var static_getter = MakeCompatibleDelegate<Func<TProp>>(get_method);
+                    getter = (nil) => static_getter();
+                }
+                else
+                {
+                    getter = MakeCompatibleDelegate<Func<object, TProp>>(get_method);
+                }
+            }
+            else
+            {
+                getter = null;
+            }
+
+            if (prop.CanWrite)
+            {
+                var set_method = prop.GetSetMethod();
+                if (set_method.IsStatic)
+                {
+                    var static_setter = MakeCompatibleDelegate<Action<TProp>>(set_method);
+                    setter = (nil, value) => static_setter(value);
+                }
+                else
+                {
+                    setter = MakeCompatibleDelegate<Action<object, TProp>>(set_method);
+                }
+            }
+            else
+            {
+                setter = null;
+            }
         }
 
         /*

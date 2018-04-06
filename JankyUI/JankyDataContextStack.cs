@@ -32,7 +32,7 @@ namespace JankyUI
             if (!_acessorCache.TryGetValue(typeKey, out var getSetPair))
             {
                 Console.WriteLine("[JankyStack] Creating new getter for '{0}.{1}'", curType, memberName);
-                const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+                const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static;
                 var targetMember = curType.GetMember(memberName, flags).FirstOrDefault();
                 switch (targetMember)
                 {
