@@ -2,6 +2,7 @@
 using JankyUI.Attributes;
 using JankyUI.Binding;
 using JankyUI.Enums;
+using JankyUI.EventArgs;
 using UnityEngine;
 
 namespace JankyUI.Nodes
@@ -11,15 +12,16 @@ namespace JankyUI.Nodes
     [JankyProperty("images", nameof(Images), DefaultValue = "")]
     [JankyProperty("columns", nameof(Columns))]
     [JankyProperty("selected-index", nameof(SelectedIndex))]
-    [JankyProperty("on-change", nameof(OnSelect))]
+    [JankyProperty("on-change", nameof(OnChange))]
     internal class SelectNode : LayoutNode
     {
+        public JankyMethod<Action<JankyEventArgs<int>>> OnChange;
+
         public JankyProperty<string[]> Texts;
         public JankyProperty<Texture[]> Images;
 
         public JankyProperty<int> Columns;
         public JankyProperty<int> SelectedIndex;
-        public JankyMethod<Action<int>> OnSelect;
 
         private GUIContent[] Contents { get; set; }
 
@@ -53,14 +55,14 @@ namespace JankyUI.Nodes
 #if MOCK
             Console.WriteLine("Select: {2} {0} [{1}]", Columns, string.Join(",", Texts), SelectedIndex);
 #else
-            var newIdx = (Columns <= 0)
-                ? GUILayout.Toolbar(SelectedIndex, Contents, GetLayoutOptions())
-                : GUILayout.SelectionGrid(SelectedIndex, Contents, Columns, GetLayoutOptions());
+            int oldValue = SelectedIndex;
+            int newValue = (Columns <= 0)
+                ? GUILayout.Toolbar(oldValue, Contents, GetLayoutOptions())
+                : GUILayout.SelectionGrid(oldValue, Contents, Columns, GetLayoutOptions());
 
-            SelectedIndex.Value = newIdx;
-
+            SelectedIndex.Value = newValue;
             if (SelectedIndex.LastSetResult != DataOperationResultEnum.Unchanged)
-                OnSelect.Invoke(newIdx);
+                OnChange.Invoke(new JankyEventArgs<int>(Context.WindowID, Name, oldValue, newValue));
 #endif
         }
     }

@@ -2,15 +2,16 @@
 using System;
 using System.Collections.Generic;
 using JankyUI.Attributes;
+using JankyUI.Binding;
 using UnityEngine;
 
 namespace JankyUI.Nodes
 {
     [JankyProperty("data-context", nameof(DataContextName))]
-    [JankyProperty("style", nameof(Style))]
+    [JankyProperty("name", nameof(Name))]
     internal class Node
     {
-        public Binding.JankyProperty<GUIStyle> Style;
+        public JankyProperty<string> Name;
         public string DataContextName;
 
         public List<Node> Children { get; set; }

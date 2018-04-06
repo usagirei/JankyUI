@@ -2,11 +2,11 @@
 using JankyUI.Attributes;
 using JankyUI.Binding;
 using JankyUI.Enums;
+using JankyUI.EventArgs;
 using UnityEngine;
 
 namespace JankyUI.Nodes
 {
-
     [JankyTag("Textbox")]
     [JankyProperty("text", nameof(Text), DefaultValue = "")]
     [JankyProperty("type", nameof(Type), DefaultValue = "simple")]
@@ -15,11 +15,12 @@ namespace JankyUI.Nodes
     [JankyProperty("on-change", nameof(OnChange))]
     internal class TextboxNode : LayoutNode
     {
+        public JankyMethod<Action<JankyEventArgs<string>>> OnChange;
+
         public JankyProperty<string> Text;
         public JankyProperty<TextBoxTypeEnum> Type;
         public JankyProperty<char> Mask;
         public JankyProperty<int> Length;
-        public JankyMethod<Action<string>> OnChange;
 
         protected override void OnGUI()
         {
@@ -27,7 +28,8 @@ namespace JankyUI.Nodes
             Console.WriteLine("Textbox: {0} {1} {2} {3}", Text, Type, Mask, Length);
 #else
 
-            string value = Text.Value;
+            string oldValue = Text.Value;
+            string newValue = oldValue;
             GUILayoutOption[] layoutOptions = GetLayoutOptions();
             int length = Length;
             char mask = Mask;
@@ -37,15 +39,15 @@ namespace JankyUI.Nodes
                 switch (Type.Value)
                 {
                     case TextBoxTypeEnum.Simple:
-                        value = GUILayout.TextField(value, layoutOptions);
+                        newValue = GUILayout.TextField(oldValue, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Multiline:
-                        value = GUILayout.TextArea(value, layoutOptions);
+                        newValue = GUILayout.TextArea(oldValue, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Password:
-                        value = GUILayout.PasswordField(value, mask, layoutOptions);
+                        newValue = GUILayout.PasswordField(oldValue, mask, layoutOptions);
                         break;
                 }
             }
@@ -54,22 +56,22 @@ namespace JankyUI.Nodes
                 switch (Type.Value)
                 {
                     case TextBoxTypeEnum.Simple:
-                        value = GUILayout.TextField(value, length, layoutOptions);
+                        newValue = GUILayout.TextField(oldValue, length, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Multiline:
-                        value = GUILayout.TextArea(value, length, layoutOptions);
+                        newValue = GUILayout.TextArea(oldValue, length, layoutOptions);
                         break;
 
                     case TextBoxTypeEnum.Password:
-                        value = GUILayout.PasswordField(value, mask, length, layoutOptions);
+                        newValue = GUILayout.PasswordField(oldValue, mask, length, layoutOptions);
                         break;
                 }
             }
 
-            Text.Value = value;
+            Text.Value = newValue;
             if (Text.LastSetResult == DataOperationResultEnum.Success)
-                OnChange.Invoke(value);
+                OnChange.Invoke(new JankyEventArgs<string>(Context.WindowID, Name, oldValue, newValue));
 #endif
         }
     }

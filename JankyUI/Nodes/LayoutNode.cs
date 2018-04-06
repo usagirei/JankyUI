@@ -14,7 +14,7 @@ namespace JankyUI.Nodes
     [JankyProperty("height", nameof(Height), DefaultValue = "NaN")]
     [JankyProperty("min-height", nameof(MinHeight), DefaultValue = "NaN")]
     [JankyProperty("max-height", nameof(MaxHeight), DefaultValue = "NaN")]
-    [JankyProperty("stretch", nameof(StrechMode), DefaultValue = "width")]
+    [JankyProperty("stretch", nameof(StrechMode), DefaultValue = "none")]
     internal abstract class LayoutNode : Node
     {
 
@@ -45,8 +45,8 @@ namespace JankyUI.Nodes
                     yield return GUILayout.Width(MaxHeight);
 
                 var flags = StrechMode.Value;
-                yield return GUILayout.ExpandWidth((flags & StretchModeEnum.Width) == StretchModeEnum.Width);
-                yield return GUILayout.ExpandHeight((flags & StretchModeEnum.Height) == StretchModeEnum.Height);
+                yield return GUILayout.ExpandWidth((flags & StretchModeEnum.Horizontal) == StretchModeEnum.Horizontal);
+                yield return GUILayout.ExpandHeight((flags & StretchModeEnum.Vertical) == StretchModeEnum.Vertical);
             }
             return Enumerate().ToArray();
         }
