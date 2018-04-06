@@ -5,30 +5,26 @@ using UnityEngine;
 
 namespace JankyUI.Nodes
 {
-    [JankyTag("Label")]
+
+    [JankyTag("Box")]
     [JankyProperty("text", nameof(Text))]
     [JankyProperty("image", nameof(Image))]
-    internal class LabelNode : LayoutNode
+    internal class BoxNode : LayoutNode
     {
         public JankyProperty<string> Text;
         public JankyProperty<Texture> Image;
 
         private readonly GUIContent Content;
 
-        public LabelNode()
+        public BoxNode()
         {
             Content = new GUIContent();
         }
 
         protected override void OnGUI()
         {
-#if MOCK
             UpdateContent();
-            Console.WriteLine("Label: {0}", Text);
-#else
-            UpdateContent();
-            GUILayout.Label(Content, GetLayoutOptions());
-#endif
+            GUILayout.Box(Content, GetLayoutOptions());
         }
 
         private void UpdateContent()

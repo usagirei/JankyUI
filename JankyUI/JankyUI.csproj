@@ -73,6 +73,7 @@
     <Compile Include="Enums\ExpandModeEnum.cs" />
     <Compile Include="EventArgs\JankyEventArgs.cs" />
     <Compile Include="EventArgs\JankyEventArgs`1.cs" />
+    <Compile Include="Nodes\Widgets\BoxNode.cs" />
     <Compile Include="Nodes\Widgets\LabelNode.cs" />
     <Compile Include="Nodes\Containers\ScrollViewNode.cs" />
     <Compile Include="Nodes\Containers\GroupNode.cs" />

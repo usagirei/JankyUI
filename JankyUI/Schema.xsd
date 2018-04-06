@@ -290,6 +290,17 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="Box" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:SimpleNodeWithLayoutOptions">
+          <xs:attribute name="text" type="jank:Attr-String" />
+          <xs:attribute name="image" type="jank:Attr-Texture" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ScrollBar" substitutionGroup="jank:Node">
     <xs:complexType>
       <xs:complexContent>
