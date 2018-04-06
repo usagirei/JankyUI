@@ -27,6 +27,8 @@ namespace JankyUI.Tests
         {
             public float BindFloatProp { get; set; }
             public float BindFloatField;
+            public static float BindFloatPropStatic { get; set; }
+            public static float BindFloatFieldStatic;
 
             public int BindIntProp { get; set; }
             public int BindIntField;
@@ -54,6 +56,9 @@ namespace JankyUI.Tests
                 BindEnumField = EnumTest.Value1
             };
 
+            DataContext.BindFloatFieldStatic = 100;
+            DataContext.BindFloatPropStatic = 200;
+
             _ctx = new JankyNodeContext(dc);
             _ctx.Resources["RES_INT"] = 13;
             _ctx.Resources["RES_INT_STR"] = "-37";
@@ -72,28 +77,30 @@ namespace JankyUI.Tests
         }
 
         [DataTestMethod]
-        [DataRow(typeof(Single), "1.5", 1.5f, false,                        DisplayName = "Test Float Inline Positive")]
-        [DataRow(typeof(Single), "-1.5", -1.5f, false,                      DisplayName = "Test Float Inline Negative")]
-        [DataRow(typeof(Single), "NaN", float.NaN, false,                   DisplayName = "Test Float Inline NaN")]
-        [DataRow(typeof(Single), "#RES_FLOAT", -66.6f, false,               DisplayName = "Test Float Value Resource")]
-        [DataRow(typeof(Single), "#RES_FLOAT_STR", -66.6f, false,           DisplayName = "Test Float String Resource")]
-        [DataRow(typeof(Single), "@BindFloatProp", 123.45f, true,           DisplayName = "Test Float Property Binding")]
-        [DataRow(typeof(Single), "@BindFloatField", 678.9f, true,           DisplayName = "Test Float Field Binding")]
+        [DataRow(typeof(Single), "1.5", 1.5f, false,                              DisplayName = "Test Float Inline Positive")]
+        [DataRow(typeof(Single), "-1.5", -1.5f, false,                            DisplayName = "Test Float Inline Negative")]
+        [DataRow(typeof(Single), "NaN", float.NaN, false,                         DisplayName = "Test Float Inline NaN")]
+        [DataRow(typeof(Single), "#RES_FLOAT", -66.6f, false,                     DisplayName = "Test Float Value Resource")]
+        [DataRow(typeof(Single), "#RES_FLOAT_STR", -66.6f, false,                 DisplayName = "Test Float String Resource")]
+        [DataRow(typeof(Single), "@BindFloatProp", 123.45f, true,                 DisplayName = "Test Float Property Binding")]
+        [DataRow(typeof(Single), "@BindFloatField", 678.9f, true,                 DisplayName = "Test Float Field Binding")]
+        [DataRow(typeof(Single), "@BindFloatPropStatic", 200.0f, true,            DisplayName = "Test Float Static Property Binding")]
+        [DataRow(typeof(Single), "@BindFloatFieldStatic", 100.0f, true,           DisplayName = "Test Float Static Field Binding")]
         //                                                                                                              
-        [DataRow(typeof(Int32), "1", 1, false,                              DisplayName = "Test Int Positive")]
-        [DataRow(typeof(Int32), "-3", -3, false,                            DisplayName = "Test Int Negative")]
-        [DataRow(typeof(Int32), "#RES_INT", 13, false,                      DisplayName = "Test Int Value Resource")]
-        [DataRow(typeof(Int32), "#RES_INT_STR", -37, false,                 DisplayName = "Test Int String Resource")]
-        [DataRow(typeof(Int32), "@BindIntProp", 42, true,                   DisplayName = "Test Int Property Binding")]
-        [DataRow(typeof(Int32), "@BindIntField", -42, true,                 DisplayName = "Test Int Field Binding")]
+        [DataRow(typeof(Int32), "1", 1, false,                                    DisplayName = "Test Int Positive")]
+        [DataRow(typeof(Int32), "-3", -3, false,                                  DisplayName = "Test Int Negative")]
+        [DataRow(typeof(Int32), "#RES_INT", 13, false,                            DisplayName = "Test Int Value Resource")]
+        [DataRow(typeof(Int32), "#RES_INT_STR", -37, false,                       DisplayName = "Test Int String Resource")]
+        [DataRow(typeof(Int32), "@BindIntProp", 42, true,                         DisplayName = "Test Int Property Binding")]
+        [DataRow(typeof(Int32), "@BindIntField", -42, true,                       DisplayName = "Test Int Field Binding")]
         //                                                                                                              
-        [DataRow(typeof(EnumTest), "VALUE0", EnumTest.value0, false,        DisplayName = "Test Enum Inline #1")]
-        [DataRow(typeof(EnumTest), "vAlUe1", EnumTest.Value1, false,        DisplayName = "Test Enum Inline #2")]
-        [DataRow(typeof(EnumTest), "value2", EnumTest.VALUE2, false,        DisplayName = "Test Enum Inline #3")]
-        [DataRow(typeof(EnumTest), "#RES_ENUM", EnumTest.value0, false,     DisplayName = "Test Enum Value Resource")]
-        [DataRow(typeof(EnumTest), "#RES_ENUM_STR", EnumTest.VALUE2, false, DisplayName = "Test Enum String Resource")]
-        [DataRow(typeof(EnumTest), "@BindEnumProp", EnumTest.Value1, true,  DisplayName = "Test Enum Property Binding")]
-        [DataRow(typeof(EnumTest), "@BindEnumField", EnumTest.Value1, true, DisplayName = "Test Enum Field Binding")]
+        [DataRow(typeof(EnumTest), "VALUE0", EnumTest.value0, false,              DisplayName = "Test Enum Inline #1")]
+        [DataRow(typeof(EnumTest), "vAlUe1", EnumTest.Value1, false,              DisplayName = "Test Enum Inline #2")]
+        [DataRow(typeof(EnumTest), "value2", EnumTest.VALUE2, false,              DisplayName = "Test Enum Inline #3")]
+        [DataRow(typeof(EnumTest), "#RES_ENUM", EnumTest.value0, false,           DisplayName = "Test Enum Value Resource")]
+        [DataRow(typeof(EnumTest), "#RES_ENUM_STR", EnumTest.VALUE2, false,       DisplayName = "Test Enum String Resource")]
+        [DataRow(typeof(EnumTest), "@BindEnumProp", EnumTest.Value1, true,        DisplayName = "Test Enum Property Binding")]
+        [DataRow(typeof(EnumTest), "@BindEnumField", EnumTest.Value1, true,       DisplayName = "Test Enum Field Binding")]
         public void TestPropertySetter(Type propType, string testData, object expected, bool skipNotJanky)
         {
             var classType = MakeNodeType(propType);
