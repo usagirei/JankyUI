@@ -409,8 +409,7 @@
       <xs:complexContent>
         <xs:extension base="jank:ComplexNode">
           <xs:attribute name="title" type="jank:Attr-String" />
-          <xs:attribute name="mouse-enter" type="jank:Attr-Method" />
-          <xs:attribute name="mouse-leave" type="jank:Attr-Method" />
+          <xs:attribute name="on-mouse-over" type="jank:Attr-Method" />
 
           <xs:attribute name="width" type="jank:Attr-Decimal" />
           <xs:attribute name="height" type="jank:Attr-Decimal" />

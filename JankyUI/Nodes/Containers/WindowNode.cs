@@ -1,23 +1,22 @@
 ﻿using System;
 using JankyUI.Attributes;
 using JankyUI.Binding;
+using JankyUI.EventArgs;
 using UnityEngine;
 
 namespace JankyUI.Nodes
 {
     [JankyTag("Window")]
-    [JankyProperty("mouse-enter", nameof(MouseEnter))]
-    [JankyProperty("mouse-leave", nameof(MouseLeave))]
+    [JankyProperty("on-mouse-over", nameof(MouseOver))]
     [JankyProperty("title", nameof(Title))]
     internal class WindowNode : AreaNode
     {
         public JankyProperty<string> Title;
-        public JankyMethod<Action<int, bool>> MouseEnter;
-        public JankyMethod<Action<int, bool>> MouseLeave;
+        public JankyMethod<Action<JankyEventArgs<bool>>> MouseOver;
 
         public int ID { get { return Context.WindowID; } }
 
-        private bool _mouseState = false;
+        private bool _mouseIsOver = false;
 
         protected override void OnGUI()
         {
@@ -26,14 +25,12 @@ namespace JankyUI.Nodes
 #else
             AreaRect = GUI.Window(ID, AreaRect, WndProc, Title);
 
+            var oldMouseState = _mouseIsOver;
             var newMouseState = AreaRect.Contains(Event.current.mousePosition);
-            if (newMouseState != _mouseState)
+            if (newMouseState != oldMouseState)
             {
-                _mouseState = newMouseState;
-                if (newMouseState)
-                    MouseEnter.Invoke(ID, true);
-                else
-                    MouseLeave.Invoke(ID, false);
+                _mouseIsOver = newMouseState;
+                MouseOver.Invoke(new JankyEventArgs<bool>(ID, Name, oldMouseState, newMouseState));
             }
 #endif
         }
@@ -52,7 +49,7 @@ namespace JankyUI.Nodes
                 var border = GUI.skin.window.padding;
 
                 clientArea.Set(border.left, border.top, Width - (border.left + border.right), Height - (border.top + border.bottom));
-                
+
                 GUILayout.BeginArea(clientArea);
 
                 foreach (var child in Children)

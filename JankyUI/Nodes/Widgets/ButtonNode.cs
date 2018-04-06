@@ -41,16 +41,13 @@ namespace JankyUI.Nodes
             OnClick.Invoke(new JankyEventArgs(Context.WindowID, Name));
 #else
             var args = new JankyEventArgs(Context.WindowID, Name);
-            if (Type.Value == ButtonTypeEnum.Repeat)
-            {
-                if (GUILayout.RepeatButton(Content, GetLayoutOptions()))
-                    OnClick.Invoke(args);
-            }
-            else
-            {
-                if (GUILayout.Button(Content, GetLayoutOptions()))
-                    OnClick.Invoke(args);
-            }
+
+            bool wasClicked = (Type.Value == ButtonTypeEnum.Repeat)
+                ? GUILayout.RepeatButton(Content, GetLayoutOptions())
+                : GUILayout.Button(Content, GetLayoutOptions());
+
+            if (wasClicked)
+                OnClick.Invoke(args);
 #endif
         }
     }
