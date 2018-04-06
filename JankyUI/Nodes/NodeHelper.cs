@@ -179,7 +179,6 @@ namespace JankyUI.Nodes
                         throw new NotSupportedException("Method Bindings can't be static values");
 #else
                         Console.WriteLine("Method Bindings can't be static values");
-                        instance = Activator.CreateInstance(propType);
 #endif
                     }
                     else
