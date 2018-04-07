@@ -114,7 +114,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
   </Target>
-  <Target Name="BeforeBuild" Condition=" ('$(Configuration)' == 'Release') OR ('$(Configuration)' == 'Jenkins') ">
+  <Target Name="BeforeBuild" Condition=" '$(Configuration)' == 'Release' ">
     <GitDescribe LightWeight="True" Match="v[0-9]*">
       <Output TaskParameter="Tag" PropertyName="VersionTag" />
       <Output TaskParameter="CommitCount" PropertyName="Revision" />
