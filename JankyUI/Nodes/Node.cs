@@ -44,9 +44,20 @@ namespace JankyUI.Nodes
         {
             if (!DataContextName.IsNullOrWhiteSpace())
             {
-                Context.DataContextStack.Push(DataContextName);
-                OnGUI();
-                Context.DataContextStack.Pop();
+                if (DataContextName.IndexOf('.') != -1)
+                {
+                    var parts = DataContextName.Split('.');
+                    for (int i = 0; i < parts.Length; i++)
+                        Context.DataContextStack.Push(parts[i]);
+                    OnGUI();
+                    for (int i = 0; i < parts.Length; i++)
+                        Context.DataContextStack.Pop();
+                }else
+                {
+                    Context.DataContextStack.Push(DataContextName);
+                    OnGUI();
+                    Context.DataContextStack.Pop();
+                }
             }else
             {
                 OnGUI();
