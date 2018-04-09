@@ -95,6 +95,9 @@ namespace JankyUI
 
             foreach (XmlNode childNode in xmlNode.ChildNodes)
             {
+                if (childNode.NodeType == XmlNodeType.Comment)
+                    continue;
+
                 var child = ResolveNodeRecursive(context, childNode);
                 node.Children.Add(child);
             }
