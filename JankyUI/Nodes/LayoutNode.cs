@@ -33,16 +33,16 @@ namespace JankyUI.Nodes
                 if (!float.IsNaN(Width))
                     yield return GUILayout.Width(Width);
                 if (!float.IsNaN(MinWidth))
-                    yield return GUILayout.Width(MinWidth);
+                    yield return GUILayout.MinWidth(MinWidth);
                 if (!float.IsNaN(MaxWidth))
-                    yield return GUILayout.Width(MaxWidth);
+                    yield return GUILayout.MaxWidth(MaxWidth);
 
                 if (!float.IsNaN(Height))
                     yield return GUILayout.Height(Height);
                 if (!float.IsNaN(MinHeight))
-                    yield return GUILayout.Height(MinHeight);
+                    yield return GUILayout.MinHeight(MinHeight);
                 if (!float.IsNaN(MaxHeight))
-                    yield return GUILayout.Height(MaxHeight);
+                    yield return GUILayout.MaxHeight(MaxHeight);
 
                 var flags = StrechMode.Value;
                 yield return GUILayout.ExpandWidth((flags & StretchModeEnum.Horizontal) == StretchModeEnum.Horizontal);
