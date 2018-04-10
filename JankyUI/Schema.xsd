@@ -225,6 +225,7 @@
 
   <xs:complexType name="SimpleNode" abstract="true">
     <xs:attribute name="data-context" type="jank:Identifier" />
+    <!-- TODO: Change to Identifier with Dot Separator -->
     <xs:attribute name="name" type="jank:Identifier" use="optional" />
   </xs:complexType>
 
@@ -373,6 +374,7 @@
         <xs:extension base="jank:SimpleNodeWithLayoutOptions">
           <xs:attribute name="checked" type="jank:Attr-Bool" />
           <xs:attribute name="text" type="jank:Attr-String" />
+          <xs:attribute name="image" type="jank:Attr-Texture" />
           <xs:attribute name="on-change" type="jank:Attr-Method" use="optional" />
         </xs:extension>
       </xs:complexContent>
