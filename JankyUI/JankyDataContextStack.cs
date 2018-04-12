@@ -70,18 +70,19 @@ namespace JankyUI
 
         public void Begin()
         {
-            Stack.Push(JankyContext.DataContext);
+            //Stack.Push(JankyContext.DataContext);
+            Stack.Clear();
         }
 
         public object Current()
         {
-            return Stack.Count == 0 ? null : Stack.Peek();
+            return Stack.Count == 0 ? JankyContext.DataContext : Stack.Peek();
         }
 
         public void End()
         {
             // Unbalanced Stack
-            if (Stack.Count != 1 || !ReferenceEquals(JankyContext.DataContext, Stack.Peek()))
+            if (Stack.Count != 0)
             {
                 throw new Exception("Unbalanced Stack");
             }

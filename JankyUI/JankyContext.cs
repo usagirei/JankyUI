@@ -33,6 +33,7 @@ namespace JankyUI
 
             DataContextStack.Begin();
 
+            GUI.skin = Skin;
             RootNode.Execute();
 
             DataContextStack.End();
