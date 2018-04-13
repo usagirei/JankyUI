@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using JankyUI.Attributes;
-using JankyUI.Binding;
+using JankyUI.Nodes.Binding;
 using UnityEngine;
 
 namespace JankyUI.Nodes

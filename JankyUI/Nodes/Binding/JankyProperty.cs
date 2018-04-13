@@ -5,7 +5,7 @@ using System.Reflection;
 using JankyUI.Enums;
 using JankyUI.Nodes;
 
-namespace JankyUI.Binding
+namespace JankyUI.Nodes.Binding
 {
     internal class JankyProperty<T>
     {

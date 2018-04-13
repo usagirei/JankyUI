@@ -22,7 +22,8 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\JankyUI.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -62,10 +63,13 @@
   <ItemGroup>
     <Compile Include="Attributes\JankyDefaultOverrideAttribute.cs" />
     <Compile Include="Attributes\JankyPropertyAttribute.cs" />
-    <Compile Include="Binding\BindingUtils.cs" />
-    <Compile Include="Binding\JankyMethod.cs" />
-    <Compile Include="Binding\JankyProperty.cs" />
+    <Compile Include="DynamicUtils.cs" />
+    <Compile Include="Nodes\Binding\JankyMethod.cs" />
+    <Compile Include="Nodes\Binding\JankyProperty.cs" />
+    <Compile Include="Compat\ValueTuple`2.cs" />
+    <Compile Include="Converters\TextureConverter.cs" />
     <Compile Include="Enums\ButtonTypeEnum.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="IJankyContext.cs" />
     <Compile Include="JankyContext.cs" />
     <Compile Include="JankyDataContextStack.cs" />
@@ -92,14 +96,11 @@
     <Compile Include="Nodes\Widgets\TextboxNode.cs" />
     <Compile Include="Nodes\Widgets\ButtonNode.cs" />
     <Compile Include="Attributes\JankyTagAttribute.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Nodes\Widgets\CheckboxNode.cs" />
     <Compile Include="Enums\OpResult.cs" />
     <Compile Include="Enums\TextBoxTypeEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Nodes\Containers\WindowNode.cs" />
-    <Compile Include="Compat\ValueTuple`2.cs" />
-    <Compile Include="TextureConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Schema.xsd">

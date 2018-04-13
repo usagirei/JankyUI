@@ -8,9 +8,9 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace JankyUI
+namespace JankyUI.Converters
 {
-    class TextureConverter : TypeConverter
+    public class TextureConverter : TypeConverter
     {
         public static TextureConverter Instance { get; } = new TextureConverter();
 

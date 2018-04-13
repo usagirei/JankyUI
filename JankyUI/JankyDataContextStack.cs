@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JankyUI.Binding;
+using JankyUI.Nodes.Binding;
 using JankyUI.Enums;
 using JankyUI.Nodes;
 using UnityEngine;
@@ -15,7 +15,7 @@ namespace JankyUI
             = new Dictionary<(Type, string), (Func<object, object>, Action<object, object>)>();
 
         private Func<object, object> _emptyGetter
-            = BindingUtils.MakeEmptyDelegate<Func<object, object>>();
+            = DynamicUtils.MakeEmptyDelegate<Func<object, object>>();
 
         private Stack<object> Stack { get; }
                             = new Stack<object>();
@@ -38,12 +38,12 @@ namespace JankyUI
                 {
                     case PropertyInfo prop_info:
                         {
-                            BindingUtils.MakePropertyAcessors(prop_info, out get, out set);
+                            DynamicUtils.MakePropertyAcessors(prop_info, out get, out set);
                         }
                         break;
                     case FieldInfo field_info:
                         {
-                            BindingUtils.MakeFieldAcessors(field_info, out get, out set);
+                            DynamicUtils.MakeFieldAcessors(field_info, out get, out set);
                         }
                         break;
                     case null:

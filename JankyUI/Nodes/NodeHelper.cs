@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using JankyUI.Attributes;
-using JankyUI.Binding;
+using JankyUI.Nodes.Binding;
 
 namespace JankyUI.Nodes
 {
@@ -69,14 +69,14 @@ namespace JankyUI.Nodes
                     break;
 
                 case FieldInfo field_info:
-                    BindingUtils.MakeFieldGetterSetter(field_info, out _, out setterMethod);
+                    DynamicUtils.MakeFieldGetterSetter(field_info, out _, out setterMethod);
                     break;
 
                 default:
                     throw new Exception("Member is not Supported");
             }
 
-            var setterDelegate = BindingUtils.MakeCompatibleDelegate<Action<Node, object>>(setterMethod);
+            var setterDelegate = DynamicUtils.MakeCompatibleDelegate<Action<Node, object>>(setterMethod);
             var propertyType = setterMethod.GetParameters().Last().ParameterType;
 
             if (propertyType.IsSubclassOfRawGeneric(typeof(JankyProperty<>)))

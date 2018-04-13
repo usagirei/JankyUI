@@ -1,6 +1,6 @@
 ﻿using System;
 using JankyUI.Attributes;
-using JankyUI.Binding;
+using JankyUI.Nodes.Binding;
 using JankyUI.EventArgs;
 using UnityEngine;
 

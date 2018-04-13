@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using JankyUI.Attributes;
-using JankyUI.Binding;
+using JankyUI.Nodes.Binding;
 using JankyUI.Enums;
 using UnityEngine;
 

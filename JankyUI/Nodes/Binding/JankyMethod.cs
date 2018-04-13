@@ -1,7 +1,7 @@
 ﻿using System;
 using JankyUI.Nodes;
 
-namespace JankyUI.Binding
+namespace JankyUI.Nodes.Binding
 {
     // TODO: make Lazy Binding like PropertyBinding (Only Recreate on type change, not on target)
     // That won't crash with invalid method signature but rather do nothing
@@ -14,7 +14,7 @@ namespace JankyUI.Binding
 
         static JankyMethod()
         {
-            Empty = BindingUtils.MakeEmptyDelegate<TDelegate>();
+            Empty = DynamicUtils.MakeEmptyDelegate<TDelegate>();
         }
 
         // TODO: Try-Catch on JankyMethod Callers
@@ -73,8 +73,8 @@ namespace JankyUI.Binding
                 try
                 {
                     _delegate = (targetMethod.IsStatic)
-                        ? BindingUtils.MakeCompatibleDelegate<TDelegate>(targetMethod)
-                        : BindingUtils.MakeCompatibleDelegate<TDelegate>(targetMethod, targetObj);
+                        ? DynamicUtils.MakeCompatibleDelegate<TDelegate>(targetMethod)
+                        : DynamicUtils.MakeCompatibleDelegate<TDelegate>(targetMethod, targetObj);
                 }
                 catch
                 {

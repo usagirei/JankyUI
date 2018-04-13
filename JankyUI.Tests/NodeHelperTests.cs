@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using JankyUI.Nodes;
+using JankyUI.Nodes.Binding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace JankyUI.Tests
@@ -140,7 +141,7 @@ namespace JankyUI.Tests
 
             if (__builtClassType__ == null)
             {
-                var jankPropType = typeof(Binding.JankyProperty<>).MakeGenericType(elemType);
+                var jankPropType = typeof(JankyProperty<>).MakeGenericType(elemType);
                 _tb = _mb.DefineType(typeName, TypeAttributes.Class | TypeAttributes.Public, typeof(Node));
                 var ctor = typeof(Attributes.JankyPropertyAttribute).GetConstructor(new[] { typeof(string), typeof(string) });
                 _tb.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] { "jfield", "JankField" }));

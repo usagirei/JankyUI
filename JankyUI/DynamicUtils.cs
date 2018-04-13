@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 
-namespace JankyUI.Binding
+namespace JankyUI
 {
-    public static class BindingUtils
+    public static class DynamicUtils
     {
         private static Dictionary<Type, MethodInfo> _emptyDelegates;
         private static Dictionary<string, (MethodInfo, MethodInfo)> _fieldAcessors;
@@ -16,7 +16,9 @@ namespace JankyUI.Binding
         private static AssemblyBuilder _dynamicAssembly;
         private static ModuleBuilder _dynamicModule;
 
-        static BindingUtils()
+        public static ModuleBuilder Module { get { return _dynamicModule; } }
+
+        static DynamicUtils()
         {
             _emptyDelegates = new Dictionary<Type, MethodInfo>();
             _fieldAcessors = new Dictionary<string, (MethodInfo, MethodInfo)>();
@@ -198,7 +200,6 @@ namespace JankyUI.Binding
                 return Delegate.CreateDelegate(typeof(TCompatible), methodInfo) as TCompatible;
         }
 
-
         public static void MakeFieldGetterSetter(FieldInfo field, out MethodInfo getter, out MethodInfo setter)
         {
             var cleanName = (field.DeclaringType + "::" + field.Name);
@@ -313,95 +314,5 @@ namespace JankyUI.Binding
                 setter = null;
             }
         }
-
-        /*
-        private static HashSet<string> _propertyGetSet;
-        private static Dictionary<string, DynamicMethod> _propertyGetters;
-        private static Dictionary<string, DynamicMethod> _propertySetters;
-        
-        [Obsolete("Use the Demoted Delegate Version")]
-        public static void MakePropertyAcessorOld<TProp>(PropertyInfo prop, out Func<object, TProp> getter, out Action<object, TProp> setter)
-        {
-            void MakePropertyAcessor_AutoCast(out DynamicMethod _get, out DynamicMethod _set)
-            {
-                var getter_info = prop.GetGetMethod();
-                var setter_info = prop.GetSetMethod();
-
-                var sourceType = prop.DeclaringType;
-                var propType = prop.PropertyType;
-
-                _set = null;
-                _get = null;
-
-                if (prop.CanRead)
-                {
-                    _get = new DynamicMethod(
-                        "<MakePropertyAcessor>_Getter<" + sourceType.FullName + "," + typeof(TProp).FullName + ">",
-                        typeof(TProp),
-                        new[] { typeof(object) },
-                        sourceType);
-                    var il = _get.GetILGenerator();
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Castclass, sourceType);
-                    il.Emit(OpCodes.Callvirt, getter_info);
-                    if (propType != typeof(TProp))
-                        il.Emit(OpCodes.Unbox_Any, typeof(TProp));
-                    il.Emit(OpCodes.Ret);
-                }
-
-                if (prop.CanWrite)
-                {
-                    _set = new DynamicMethod(
-                        "<MakePropertyAcessor>_Setter<" + sourceType.FullName + "," + typeof(TProp).FullName + ">",
-                        typeof(void),
-                        new[] { typeof(object), typeof(TProp) },
-                        sourceType);
-                    var il = _set.GetILGenerator();
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Castclass, sourceType);
-                    il.Emit(OpCodes.Ldarg_1);
-                    if (propType != typeof(TProp))
-                        il.Emit(OpCodes.Unbox_Any, typeof(TProp));
-                    il.Emit(OpCodes.Callvirt, setter_info);
-                    il.Emit(OpCodes.Ret);
-                }
-            }
-
-            var assignable = typeof(TProp).IsAssignableFrom(prop.PropertyType);
-            if (!assignable)
-                throw new ArgumentException("Generic argument and property type are not compatible");
-
-            DynamicMethod dm_get = null, dm_set = null;
-            getter = null;
-            setter = null;
-
-            var propIdentifier = prop.DeclaringType.FullName + "::" + prop.Name + "::" + typeof(TProp).FullName;
-            if (!_propertyGetSet.Contains(propIdentifier))
-            {
-                _propertyGetSet.Add(propIdentifier);
-
-                MakePropertyAcessor_AutoCast(out dm_get, out dm_set);
-
-                if (dm_get != null)
-                    _propertyGetters[propIdentifier] = dm_get;
-                if (dm_set != null)
-                    _propertySetters[propIdentifier] = dm_set;
-            }
-            else
-            {
-                _propertyGetters.TryGetValue(propIdentifier, out dm_get);
-                _propertySetters.TryGetValue(propIdentifier, out dm_set);
-            }
-
-            if (dm_get != null)
-            {
-                getter = (Func<object, TProp>)dm_get.CreateDelegate(typeof(Func<object, TProp>));
-            }
-            if (dm_set != null)
-            {
-                setter = (Action<object, TProp>)dm_set.CreateDelegate(typeof(Action<object, TProp>));
-            }
-        }
-        */
     }
 }
