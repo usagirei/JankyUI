@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Attributes\JankyDefaultOverrideAttribute.cs" />
     <Compile Include="Attributes\JankyPropertyAttribute.cs" />
+    <Compile Include="Compat\ValueTuple`3.cs" />
     <Compile Include="DynamicUtils.cs" />
     <Compile Include="Nodes\Binding\JankyMethod.cs" />
     <Compile Include="Nodes\Binding\JankyProperty.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="JankyDataContextStack.cs" />
     <Compile Include="JankyUIGenerator.cs" />
     <Compile Include="JankyUIManager.cs" />
+    <Compile Include="Nodes\Containers\RepeaterNode.cs" />
     <Compile Include="Nodes\Containers\AreaNode.cs" />
     <Compile Include="Enums\GroupTypeEnum.cs" />
     <Compile Include="Enums\ExpandModeEnum.cs" />

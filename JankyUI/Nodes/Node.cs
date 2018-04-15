@@ -48,13 +48,13 @@ namespace JankyUI.Nodes
                 {
                     var parts = DataContextName.Split('.');
                     for (int i = 0; i < parts.Length; i++)
-                        Context.DataContextStack.Push(parts[i]);
+                        Context.DataContextStack.PushProperty(parts[i]);
                     OnGUI();
                     for (int i = 0; i < parts.Length; i++)
                         Context.DataContextStack.Pop();
                 }else
                 {
-                    Context.DataContextStack.Push(DataContextName);
+                    Context.DataContextStack.PushProperty(DataContextName);
                     OnGUI();
                     Context.DataContextStack.Pop();
                 }

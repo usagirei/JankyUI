@@ -7,6 +7,7 @@
         TargetNull,
         TargetException,
         MissingAcessor,
-        PropertyNull
+        PropertyNull,
+        IncompatibleTypes
     }
 }

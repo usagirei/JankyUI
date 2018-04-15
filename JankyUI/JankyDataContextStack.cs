@@ -6,13 +6,17 @@ using JankyUI.Nodes.Binding;
 using JankyUI.Enums;
 using JankyUI.Nodes;
 using UnityEngine;
+using System.ComponentModel;
 
 namespace JankyUI
 {
     internal class JankyDataContextStack
     {
-        private Dictionary<(Type, String), (Func<object, object>, Action<object, object>)> _acessorCache
-            = new Dictionary<(Type, string), (Func<object, object>, Action<object, object>)>();
+        private Dictionary<Type, TypeConverter> _converterCache
+            = new Dictionary<Type, TypeConverter>();
+
+        private Dictionary<(Type, String), (Func<object, object>, Action<object, object>, Type)> _acessorCache
+            = new Dictionary<(Type, string), (Func<object, object>, Action<object, object>, Type)>();
 
         private Func<object, object> _emptyGetter
             = DynamicUtils.MakeEmptyDelegate<Func<object, object>>();
@@ -26,7 +30,7 @@ namespace JankyUI
             JankyContext = jank;
         }
 
-        private void GetAcessorFor(Type curType, string memberName, out Func<object, object> get, out Action<object, object> set)
+        private void GetAcessorFor(Type curType, string memberName, out Func<object, object> get, out Action<object, object> set, out Type targetType)
         {
             var typeKey = (curType, memberName);
             if (!_acessorCache.TryGetValue(typeKey, out var getSetPair))
@@ -39,11 +43,13 @@ namespace JankyUI
                     case PropertyInfo prop_info:
                         {
                             DynamicUtils.MakePropertyAcessors(prop_info, out get, out set);
+                            targetType = prop_info.PropertyType;
                         }
                         break;
                     case FieldInfo field_info:
                         {
                             DynamicUtils.MakeFieldAcessors(field_info, out get, out set);
+                            targetType = field_info.FieldType;
                         }
                         break;
                     case null:
@@ -51,6 +57,7 @@ namespace JankyUI
                             Console.WriteLine($"[JankyStack] Target Type has no public member named '{memberName}'");
                             get = null;
                             set = null;
+                            targetType = typeof(void);
                         }
                         break;
                     default:
@@ -58,14 +65,16 @@ namespace JankyUI
                             Console.WriteLine("[JankyStack] Unsupported Member Type: '{0}'", memberName);
                             get = null;
                             set = null;
+                            targetType = typeof(void);
                         }
                         break;
                 }
 
-                _acessorCache[typeKey] = getSetPair = (get, set);
+                _acessorCache[typeKey] = getSetPair = (get, set, targetType);
             }
             get = getSetPair.Item1;
             set = getSetPair.Item2;
+            targetType = getSetPair.Item3;
         }
 
         public void Begin()
@@ -88,32 +97,84 @@ namespace JankyUI
             }
         }
 
-        public DataOperationResultEnum GetDataContextMember<T>(string memberName, out T value)
+        public DataOperationResultEnum GetDataContextMember<TDest>(string memberName, out TDest destValue)
         {
-            value = default(T);
+            destValue = default(TDest);
 
-            var curCtx = Stack.Peek();
+            var curCtx = Current();
             if (curCtx == null)
                 return DataOperationResultEnum.TargetNull;
 
             var type = curCtx.GetType();
-            GetAcessorFor(type, memberName, out var getter, out _);
+            GetAcessorFor(type, memberName, out var getter, out _, out var srcType);
             if (getter == null)
                 return DataOperationResultEnum.MissingAcessor;
 
-            object retVal = null;
+            object srcValue = null;
             try
             {
-                retVal = getter(curCtx);
-            }catch
+                srcValue = getter(curCtx);
+            }
+            catch
             {
                 return DataOperationResultEnum.TargetException;
             }
 
-            if (retVal == null)
+            if (srcValue == null)
                 return DataOperationResultEnum.TargetNull;
 
-            value = (T)retVal;
+            var dstType = typeof(TDest);
+
+            if (srcType == dstType)
+            {
+                destValue = (TDest)srcValue;
+                return DataOperationResultEnum.Success;
+            }
+            
+            if(!_converterCache.TryGetValue(srcType, out var converter))
+                converter = _converterCache[srcType] = TypeDescriptor.GetConverter(srcType);
+
+            if (!converter.CanConvertTo(dstType))
+                return DataOperationResultEnum.IncompatibleTypes;
+
+            destValue = (TDest)converter.ConvertTo(srcValue, dstType);
+            return DataOperationResultEnum.Success;
+        }
+
+
+        public DataOperationResultEnum SetDataContextMember<TSource>(string memberName, TSource srcValue)
+        {
+            var curCtx = Current();
+            if (curCtx == null)
+                return DataOperationResultEnum.TargetNull;
+
+            var type = curCtx.GetType();
+            GetAcessorFor(type, memberName, out _, out var setter, out var dstType);
+            if (setter == null)
+                return DataOperationResultEnum.MissingAcessor;
+
+            var dstValue = dstType.IsValueType ? Activator.CreateInstance(dstType) : null;
+            var srcType = typeof(TSource);
+            if (srcType != dstType)
+            {
+                if (!_converterCache.TryGetValue(dstType, out var converter))
+                    converter = _converterCache[dstType] = TypeDescriptor.GetConverter(dstType);
+
+                if (!converter.CanConvertFrom(srcType))
+                    return DataOperationResultEnum.IncompatibleTypes;
+
+                dstValue = converter.ConvertFrom(srcValue);
+            }
+
+            try
+            {
+                setter(curCtx, dstValue);
+            }
+            catch
+            {
+                return DataOperationResultEnum.TargetException;
+            }
+
             return DataOperationResultEnum.Success;
         }
 
@@ -122,9 +183,26 @@ namespace JankyUI
             Stack.Pop();
         }
 
-        public void Push(string propertyName)
+        public void PushValue(object value)
         {
-            var curCtx = Stack.Peek();
+            if (value == null)
+            {
+                Stack.Push(null);
+            }
+            else if (!value.GetType().IsVisible)
+            {
+                Console.WriteLine("[JankyStack] Value type is not public '{0}'", value);
+                Stack.Push(null);
+            }
+            else
+            {
+                Stack.Push(value);
+            }
+        }
+
+        public void PushProperty(string propertyName)
+        {
+            var curCtx = Current();
             if (curCtx == null)
             {
                 Stack.Push(null);
@@ -132,7 +210,7 @@ namespace JankyUI
             else
             {
                 var curType = curCtx.GetType();
-                GetAcessorFor(curType, propertyName, out var getter, out _);
+                GetAcessorFor(curType, propertyName, out var getter, out _, out _);
                 if (getter == null)
                 {
                     Console.WriteLine("[JankyStack] Property has no (visible) getter: '{0}.{1}'", curType, propertyName);
@@ -161,28 +239,6 @@ namespace JankyUI
             }
         }
 
-        public DataOperationResultEnum SetDataContextMember<T>(string memberName, T value)
-        {
-            var curCtx = Stack.Peek();
-            if (curCtx == null)
-                return DataOperationResultEnum.TargetNull;
-
-            var type = curCtx.GetType();
-            GetAcessorFor(type, memberName, out _, out var setter);
-            if (setter == null)
-                return DataOperationResultEnum.MissingAcessor;
-
-            try
-            {
-                setter(curCtx, value);
-            }
-            catch
-            {
-                return DataOperationResultEnum.TargetException;
-            }
-
-            return DataOperationResultEnum.Success;
-        }
 
     }
 }

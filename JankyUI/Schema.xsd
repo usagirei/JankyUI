@@ -102,8 +102,19 @@
     </xs:annotation>
     <xs:union memberTypes="jank:Binding" />
   </xs:simpleType>
-
+  
   <!-- Object -->
+
+  <xs:simpleType name="Attr-Object" >
+    <xs:annotation>
+      <xs:documentation>
+        A Referenced Object - Only Supports #Resource and @Binding notations (No Inline).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="jank:Binding jank:Resource" />
+  </xs:simpleType>
+
+  <!-- Texture -->
 
   <xs:simpleType name="Attr-Texture" >
     <xs:annotation>
@@ -409,7 +420,33 @@
       </xs:complexContent>
     </xs:complexType>
   </xs:element>
+  
+  <xs:element name="HorizontalGroup" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:ComplexNodeWithLayoutOptions" />
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
 
+  <xs:element name="VerticalGroup" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:ComplexNodeWithLayoutOptions" />
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Repeater" substitutionGroup="jank:Node">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="jank:ComplexNode">
+          <xs:attribute name="items" type="jank:Attr-Object" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  
   <xs:element name="Area" substitutionGroup="jank:Node">
     <xs:complexType>
       <xs:complexContent>
