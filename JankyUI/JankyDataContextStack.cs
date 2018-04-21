@@ -153,7 +153,7 @@ namespace JankyUI
             if (setter == null)
                 return DataOperationResultEnum.MissingAcessor;
 
-            var dstValue = dstType.IsValueType ? Activator.CreateInstance(dstType) : null;
+            object dstValue;
             var srcType = typeof(TSource);
             if (srcType != dstType)
             {
@@ -164,6 +164,10 @@ namespace JankyUI
                     return DataOperationResultEnum.IncompatibleTypes;
 
                 dstValue = converter.ConvertFrom(srcValue);
+            }
+            else
+            {
+                dstValue = srcValue;
             }
 
             try
